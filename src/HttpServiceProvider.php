@@ -21,6 +21,23 @@
 		{
 			$this->registerAlias();
 			$this->registerServices();
+			$this->registerMiddleware();
+		}
+
+		/**
+		 * Load alias
+		 */
+		protected function registerAlias()
+		{
+			$aliases = [
+				'ResponseService' => \ResponseHTTP\Response\ResponseFacade::class,
+				'Response' => \ResponseHTTP\Response\ResponseFacade::class,
+				'ResponseREST' => \ResponseHTTP\Response\ResponseRESTFacade::class,
+			];
+
+			foreach ($aliases as $key => $value) {
+				class_alias($value, $key);
+			}
 		}
 
 		/**
@@ -36,18 +53,12 @@
 		}
 
 		/**
-		 * Load alias
+		 * Register middleware
 		 */
-		protected function registerAlias()
+		protected function registerMiddleware()
 		{
-			$aliases=[
-				'ResponseService' => \ResponseHTTP\Response\ResponseFacade::class,
-				'Response' => \ResponseHTTP\Response\ResponseFacade::class,
-				'ResponseREST' => \ResponseHTTP\Response\ResponseRESTFacade::class,
-			];
-
-			foreach ($aliases as $key => $value){
-				class_alias($value, $key);
-			}
+			$this->app->middleware([
+				\ResponseHTTP\Response\Middleware\CorsMiddleware::class
+			]);
 		}
 	}
