@@ -48,8 +48,8 @@
 			/**
 			 * Service Response
 			 */
-			$this->app->singleton('service.response', 'Core\Services\Response\ResponseService');
-			$this->app->singleton('service.response.rest', 'Core\Services\Response\ResponseREST');
+			$this->app->singleton('service.response', 'ResponseHTTP\Response\ResponseService');
+			$this->app->singleton('service.response.rest', 'ResponseHTTP\Response\ResponseREST');
 		}
 
 		/**
