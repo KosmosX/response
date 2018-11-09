@@ -32,7 +32,7 @@
 			 * Service Response
 			 */
 			$this->app->singleton('service.response', 'Core\Services\Response\ResponseService');
-			$this->app->singleton('service.response.rest', 'Core\Services\Response\ResponseRESTService');
+			$this->app->singleton('service.response.rest', 'Core\Services\Response\ResponseREST');
 		}
 
 		/**
@@ -42,6 +42,7 @@
 		{
 			$aliases=[
 				'ResponseService' => \ResponseHTTP\Response\ResponseFacade::class,
+				'Response' => \ResponseHTTP\Response\ResponseFacade::class,
 				'ResponseREST' => \ResponseHTTP\Response\ResponseRESTFacade::class,
 			];
 

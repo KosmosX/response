@@ -14,11 +14,50 @@
 
 	class ResponseService
 	{
-		use HeadersREST;
+		protected $data = [];
+		protected $links = [];
+		protected $headers = [];
+		protected $subArray;
 
-		private $data = [];
-		private $links = [];
-		private $subArray;
+		/**
+		 * Method for process response content
+		 *
+		 * @param $content
+		 * @param string $type
+		 * @return array
+		 */
+		protected function contentProcessor($content, string $type)
+		{
+			$default = $this->array($type);
+
+			if ($this->subArray)
+				$default[$type] = array_add($default[$type], $this->subArray, $content);
+			else
+				array_set($default, $type, $content);
+
+			return $default;
+		}
+
+		/**
+		 * Method make array REST response
+		 *
+		 * @param string $type
+		 * @return array
+		 */
+		protected function array(string $type)
+		{
+			$default = [];
+
+			if ($type === 'data')
+				$default = ['data' => []];
+			else
+				$default = [$type => [], 'data' => $this->data];
+
+			if ($this->links)
+				$default += ["links" => $this->links];
+
+			return $default;
+		}
 
 		/**
 		 * Method response
@@ -29,12 +68,10 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function response($content, $status, array $headers = [], $options = 0) {
+		public function response($content, $status, array $headers = [], $options = 0)
+		{
 			return response()->json($content, $status, $headers, $options)
-				->header("cache-control", $this->cacheHeaders) //variable in HeadersREST trait
-				->header("last-modified", $this->lastModified ?:Carbon::now()->toRfc7231String()) //variable in HeadersREST trait
-				->header("etag", $this->etag?:'new') //variable in HeadersREST trait
-				->withHeaders($this->headers);                      //variable in HeadersREST trait
+				->withHeaders($this->headers);
 		}
 
 		/**
@@ -56,7 +93,7 @@
 		 */
 		public function success($content, $status = 200, array $headers = [], $options = 0)
 		{
-			$message = $this->contentProcessor($content,'success');
+			$message = $this->contentProcessor($content, 'success');
 			return $this->response($message, $status, $headers, $options);
 		}
 
@@ -71,8 +108,22 @@
 		 */
 		public function data($content = "", $status = 200, array $headers = [], $options = 0)
 		{
-			$message = $this->contentProcessor($content,'data');
+			$message = $this->contentProcessor($content, 'data');
 			return $this->response($message, $status, $headers, $options);
+		}
+
+		/**
+		 * Alias error for badRequest
+		 *
+		 * @param string $content
+		 * @param int $status
+		 * @param array $headers
+		 * @param int $options
+		 * @return \Illuminate\Http\JsonResponse
+		 */
+		public function errorBadRequest($content = "Bad Request", int $status = 400, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -99,19 +150,6 @@
 		}
 
 		/**
-		 * Alias error for badRequest
-		 *
-		 * @param string $content
-		 * @param int $status
-		 * @param array $headers
-		 * @param int $options
-		 * @return \Illuminate\Http\JsonResponse
-		 */
-		public function errorBadRequest($content = "Bad Request", int $status = 400, array $headers = [], $options = 0){
-			return $this->error($content,$status,$headers,$options);
-		}
-
-		/**
 		 * Alias error for unauthorized
 		 *
 		 * @param string $content
@@ -120,8 +158,9 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function errorUnauthorized($content = "Unauthorized", int $status = 401, array $headers = [], $options = 0){
-			return $this->error($content,$status,$headers,$options);
+		public function errorUnauthorized($content = "Unauthorized", int $status = 401, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -133,8 +172,9 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function errorForbidden($content = "Forbidden", int $status = 403, array $headers = [], $options = 0){
-			return $this->error($content,$status,$headers,$options);
+		public function errorForbidden($content = "Forbidden", int $status = 403, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -146,8 +186,9 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function errorNotFound($content = "Not Found", int $status = 404, array $headers = [], $options = 0) {
-			return $this->error($content,$status,$headers,$options);
+		public function errorNotFound($content = "Not Found", int $status = 404, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -159,8 +200,9 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function errorMethodNotAllowed($content = "Method Not Allowed", int $status = 405, array $headers = [], $options = 0){
-			return $this->error($content,$status,$headers,$options);
+		public function errorMethodNotAllowed($content = "Method Not Allowed", int $status = 405, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -172,8 +214,9 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function errorRequestTimeout($content = "Error Request Timeout", int $status = 408, array $headers = [], $options = 0){
-			return $this->error($content,$status,$headers,$options);
+		public function errorRequestTimeout($content = "Error Request Timeout", int $status = 408, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -185,8 +228,9 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function errorMediaType($content = "Error Media Type", int $status = 415, array $headers = [], $options = 0){
-			return $this->error($content,$status,$headers,$options);
+		public function errorMediaType($content = "Error Media Type", int $status = 415, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -198,8 +242,9 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function errorInternal($content = "Internal Error", int $status = 500, array $headers = [], $options = 0){
-			return $this->error($content,$status,$headers,$options);
+		public function errorInternal($content = "Internal Error", int $status = 500, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -211,8 +256,9 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function errorServiceUnavailable($content = "Service Request is Unavailable", int $status = 500, array $headers = [], $options = 0){
-			return $this->error($content,$status,$headers,$options);
+		public function errorServiceUnavailable($content = "Service Request is Unavailable", int $status = 500, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		/**
@@ -223,47 +269,9 @@
 		 * @param array $headers
 		 * @param int $code
 		 */
-		public function errorException($content, $status = 400, array $headers = [], $code = 0){
-			throw new HttpException($status, $content, null, $headers, $code);
-		}
-
-		/**
-		 * Method for process response content
-		 *
-		 * @param $content
-		 * @param string $type
-		 * @return array
-		 */
-		private function contentProcessor($content, string $type)
+		public function errorException($content, $status = 400, array $headers = [], $code = 0)
 		{
-			$default = $this->array($type);
-
-			if ($this->subArray)
-				$default[$type] = array_add($default[$type], $this->subArray, $content);
-			else
-				array_set($default, $type, $content);
-
-			return $default;
-		}
-
-		/**
-		 * Method make array REST response
-		 *
-		 * @param string $type
-		 * @return array
-		 */
-		private function array(string $type) {
-			$default = [];
-
-			if($type === 'data')
-				$default = ['data' => []];
-			else
-				$default = [$type => [],'data' => $this->data];
-
-			if ($this->links)
-				$default += ["links" => $this->links];
-
-			return $default;
+			throw new HttpException($status, $content, null, $headers, $code);
 		}
 
 		/**
@@ -311,8 +319,19 @@
 		 * @param string $subArray
 		 * @return $this
 		 */
-		public function withSubArray(string $subArray){
+		public function withSubArray(string $subArray)
+		{
 			$this->subArray = $subArray;
+			return $this;
+		}
+
+		/**
+		 * @param array $headers
+		 * @return $this
+		 */
+		public function withHeaders(array $headers)
+		{
+			$this->headers = $headers;
 			return $this;
 		}
 	}
