@@ -27,10 +27,12 @@
 		 */
 		public function response($content, $status, array $headers = [], $options = 0)
 		{
-			return response()->json($content, $status, $headers, $options)
-				->withHeaders($this->headers)
-				->header("cache-control", $this->cacheHeaders)
-				->header("last-modified", $this->lastModified ?: Carbon::now()->toRfc7231String())
-				->header("etag", $this->etag ?: 'new');
+			$headers += [
+				"cache-control" => $this->cacheHeaders,
+				"last-modified" => $this->lastModified ?: Carbon::now()->toRfc7231String(),
+				"etag" => $this->etag ?: 'new'
+			];
+
+			return parent::response($content,$status,$headers,$options);
 		}
 	}

@@ -30,9 +30,8 @@
 		protected function registerAlias()
 		{
 			$aliases = [
-				'ResponseService' => \ResponseHTTP\Response\ResponseFacade::class,
-				'Response' => \ResponseHTTP\Response\ResponseFacade::class,
-				'ResponseREST' => \ResponseHTTP\Response\ResponseRESTFacade::class,
+				'Response' => \ResponseHTTP\Response\Facades\ResponseFacade::class,
+				'ResponseREST' => \ResponseHTTP\Response\Facades\ResponseRESTFacade::class,
 			];
 
 			foreach ($aliases as $key => $value) {
