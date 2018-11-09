@@ -8,6 +8,7 @@
 
 	namespace ResponseHTTP\Response;
 
+	use Illuminate\Database\Eloquent\Model;
 	use ResponseHTTP\Response\Traits\HeadersREST;
 	use Carbon\Carbon;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -20,6 +21,29 @@
 		protected $subArray;
 
 		/**
+		 * Method for successful responses
+		 * If you add data use method ->withData($data);
+		 * If you add links use method ->withLinks($links);
+		 * return response with content:
+		 * [
+		 *   "success": $content,
+		 *   "data": [] //Always
+		 *   "links": [] //if you use method withLinks()
+		 * ]
+		 *
+		 * @param mixed $content
+		 * @param int $status
+		 * @param array $headers
+		 * @param int $options
+		 * @return \Illuminate\Http\JsonResponse
+		 */
+		public function success($content, $status = 200, array $headers = [], $options = 0)
+		{
+			$message = $this->contentProcessor($content, 'success');
+			return $this->response($message, $status, $headers, $options);
+		}
+
+		/**
 		 * Method for process response content
 		 *
 		 * @param $content
@@ -28,7 +52,7 @@
 		 */
 		protected function contentProcessor($content, string $type)
 		{
-			$default = $this->array($type);
+			$default = $this->default($type);
 
 			if ($this->subArray)
 				$default[$type] = array_add($default[$type], $this->subArray, $content);
@@ -44,7 +68,7 @@
 		 * @param string $type
 		 * @return array
 		 */
-		protected function array(string $type)
+		protected function default(string $type)
 		{
 			$default = [];
 
@@ -72,29 +96,6 @@
 		{
 			return response()->json($content, $status, $headers, $options)
 				->withHeaders($this->headers);
-		}
-
-		/**
-		 * Method for successful responses
-		 * If you add data use method ->withData($data);
-		 * If you add links use method ->withLinks($links);
-		 * return response with content:
-		 * [
-		 *   "success": $content,
-		 *   "data": [] //Always
-		 *   "links": [] //if you use method withLinks()
-		 * ]
-		 *
-		 * @param mixed $content
-		 * @param int $status
-		 * @param array $headers
-		 * @param int $options
-		 * @return \Illuminate\Http\JsonResponse
-		 */
-		public function success($content, $status = 200, array $headers = [], $options = 0)
-		{
-			$message = $this->contentProcessor($content, 'success');
-			return $this->response($message, $status, $headers, $options);
 		}
 
 		/**
@@ -291,24 +292,38 @@
 		 * $hateoas make $links to standard of Rest Api
 		 *
 		 * //Example links array
-		 * links = [['self','localhost/user','GET'],['post','localhost/posts','GET']]
+		 * links = [
+		 *      ['self','localhost/user','GET'],
+		 *      ['post','localhost/posts','GET']
+		 * ]
 		 *
 		 * @param array $links
 		 * @param bool $hateoas
 		 * @return $this
 		 */
-		public function withLinks(array $links, bool $hateoas = true)
+		public function withLinks($links, bool $hateoas = true)
+		{
+
+			if ($links instanceof Model && method_exists($links, 'getLinks'))
+				$links = $links->getLinks();
+
+			foreach ($links as $link)
+				$this->withLink($link, $hateoas);
+
+			return $this;
+		}
+
+		public function withLink(array $link, bool $hateoas = true)
 		{
 			if ($hateoas) {
-				foreach ($links as $key => $link)
-					array_set($filtered, $key, [
-						"rel" => $link[0],
-						"href" => $link[1],
-						"method" => $link[2],
-					]);
-				$this->links = $filtered;
+				array_set($filtered, $filtered, [
+					"rel" => $link[0],
+					"href" => $link[1],
+					"method" => $link[2],
+				]);
+				$this->links += $filtered;
 			} else
-				$this->links = $links;
+				$this->links += $link;
 
 			return $this;
 		}
@@ -334,4 +349,9 @@
 			$this->headers = $headers;
 			return $this;
 		}
+
+		public function rest() {
+			return app('service.response.rest');
+		}
+
 	}

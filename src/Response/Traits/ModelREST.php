@@ -8,8 +8,19 @@
 
 	namespace ResponseHTTP\Response\Traits;
 
-
 	Trait ModelREST
 	{
-		abstract function setLinks();
+		private static $links = [];
+
+		abstract static function bootlLinks();
+
+		public static function setLinks(array $links) :array
+		{
+			self::$links = $links;
+			return self::getLinks();
+		}
+
+		public static function getLinks() :array {
+			return self::$links;
+		}
 	}
