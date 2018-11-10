@@ -27,10 +27,11 @@
 		 */
 		public function response($content, $status, array $headers = [], $options = 0)
 		{
+			$this->etag ?: $this->generateEtag();
 			$headers += [
 				"cache-control" => $this->cacheHeaders,
 				"last-modified" => $this->lastModified ?: Carbon::now()->toRfc7231String(),
-				"etag" => $this->etag ?: 'new'
+				"etag" => $this->etag
 			];
 
 			return parent::response($content,$status,$headers,$options);

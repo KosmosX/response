@@ -9,6 +9,8 @@
 	namespace ResponseHTTP\Response;
 
 	use Illuminate\Database\Eloquent\Model;
+	use Illuminate\Http\JsonResponse;
+	use Illuminate\Http\Response;
 	use ResponseHTTP\Response\Traits\HeadersREST;
 	use Carbon\Carbon;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -21,36 +23,13 @@
 		protected $subArray;
 
 		/**
-		 * Method for successful responses
-		 * If you add data use method ->withData($data);
-		 * If you add links use method ->withLinks($links);
-		 * return response with content:
-		 * [
-		 *   "success": $content,
-		 *   "data": [] //Always
-		 *   "links": [] //if you use method withLinks()
-		 * ]
-		 *
-		 * @param mixed $content
-		 * @param int $status
-		 * @param array $headers
-		 * @param int $options
-		 * @return \Illuminate\Http\JsonResponse
-		 */
-		public function success($content, $status = 200, array $headers = [], $options = 0)
-		{
-			$message = $this->contentProcessor($content, 'success');
-			return $this->response($message, $status, $headers, $options);
-		}
-
-		/**
 		 * Method for process response content
 		 *
 		 * @param $content
 		 * @param string $type
 		 * @return array
 		 */
-		protected function contentProcessor($content, string $type)
+		protected function contentProcessor($content, string $type): array
 		{
 			$default = $this->default($type);
 
@@ -68,7 +47,7 @@
 		 * @param string $type
 		 * @return array
 		 */
-		protected function default(string $type)
+		protected function default(string $type): array
 		{
 			$default = [];
 
@@ -94,8 +73,31 @@
 		 */
 		public function response($content, $status, array $headers = [], $options = 0)
 		{
-			return response()->json($content, $status, $headers, $options)
-				->withHeaders($this->headers);
+			array_push($headers, $this->headers);  //Added new headers loaded with headers() function
+			return response()->json($content, $status, $headers, $options);
+		}
+
+		/**
+		 * Method for successful responses
+		 * If you add data use method ->withData($data);
+		 * If you add links use method ->withLinks($links);
+		 * return response with content:
+		 * [
+		 *   "success": $content,
+		 *   "data": [] //Always
+		 *   "links": [] //if you use method withLinks()
+		 * ]
+		 *
+		 * @param mixed $content
+		 * @param int $status
+		 * @param array $headers
+		 * @param int $options
+		 * @return \Illuminate\Http\JsonResponse
+		 */
+		public function success($content, $status = 200, array $headers = [], $options = 0)
+		{
+			$message = $this->contentProcessor($content, 'success');
+			return $this->response($message, $status, $headers, $options);
 		}
 
 		/**
@@ -281,14 +283,31 @@
 		 * @param array $data
 		 * @return $this
 		 */
-		public function withData(array $data)
+		public function addData(array $data): ResponseService
 		{
 			$this->data = $data;
 			return $this;
 		}
 
 		/**
-		 * Method to add Links to error or success response
+		 * Adds to links array a default links array of model
+		 *
+		 * @param Model $model
+		 * @param bool $hateoas
+		 * @return ResponseService
+		 */
+		public function addModelLinks(Model $model, $hateoas = true) :ResponseService
+		{
+			if ($model instanceof Model && method_exists($model, 'getLinks'))
+				$links = $model->getLinks();
+
+			if ($links)
+				return $this->addLinks($links, $hateoas);
+			else
+				return $this;
+		}
+		/**
+		 * Method to adds Links to error or success response
 		 * $hateoas make $links to standard of Rest Api
 		 *
 		 * //Example links array
@@ -301,40 +320,42 @@
 		 * @param bool $hateoas
 		 * @return $this
 		 */
-		public function withLinks($links, bool $hateoas = true)
+		public function addLinks(array $links, bool $hateoas = true): ResponseService
 		{
-
-			if ($links instanceof Model && method_exists($links, 'getLinks'))
-				$links = $links->getLinks();
-
 			foreach ($links as $link)
-				$this->withLink($link, $hateoas);
-
-			return $this;
-		}
-
-		public function withLink(array $link, bool $hateoas = true)
-		{
-			if ($hateoas) {
-				array_set($filtered, $filtered, [
-					"rel" => $link[0],
-					"href" => $link[1],
-					"method" => $link[2],
-				]);
-				$this->links += $filtered;
-			} else
-				$this->links += $link;
+				$this->addLink($link, $hateoas);
 
 			return $this;
 		}
 
 		/**
-		 * Method to add sub array in error or success
+		 * Add singolar link to array links
+		 *
+		 * @param array $link
+		 * @param bool $hateoas
+		 * @return $this
+		 */
+		public function addLink(array $link, bool $hateoas = true): ResponseService
+		{
+			if ($hateoas) {
+				$filtered = [
+					"rel" => array_key_exists(0, $link) ? $link[0] : null,
+					"href" => array_key_exists(1, $link) ? $link[1] : null,
+					"method" => array_key_exists(2, $link) ? $link[2] : null,
+				];
+				array_push($this->links, $filtered);
+			} else
+				array_push($this->links, $link);
+			return $this;
+		}
+
+		/**
+		 * Method to add sub array in error or success response
 		 *
 		 * @param string $subArray
 		 * @return $this
 		 */
-		public function withSubArray(string $subArray)
+		public function addSubArray(string $subArray): ResponseService
 		{
 			$this->subArray = $subArray;
 			return $this;
@@ -344,13 +365,14 @@
 		 * @param array $headers
 		 * @return $this
 		 */
-		public function withHeaders(array $headers)
+		public function headers(array $headers): ResponseService
 		{
 			$this->headers = $headers;
 			return $this;
 		}
 
-		public function rest() {
+		public function rest(): ResponseREST
+		{
 			return app('service.response.rest');
 		}
 
