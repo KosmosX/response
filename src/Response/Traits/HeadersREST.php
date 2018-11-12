@@ -4,6 +4,7 @@
 
 	use Carbon\Carbon;
 	use Illuminate\Http\JsonResponse;
+	use Illuminate\Http\Request;
 	use Illuminate\Http\Response;
 	use Illuminate\Support\Facades\Crypt;
 
@@ -91,6 +92,17 @@
 		}
 
 		/**
+		 * @param $response
+		 * @return string
+		 */
+		public function geLastModified($response): string
+		{
+			if ($response instanceof JsonResponse || $response instanceof Response)
+				return $response->headers->get('last-modified');
+			return '';
+		}
+
+		/**
 		 * Method for generate unique etag string and set it in header response
 		 * playload: code.key.datatime
 		 * -code is optional if you would generate etag with different code
@@ -109,7 +121,7 @@
 			$key = $key ?: str_random(10);
 			$time = Carbon::now()->format('Y-m-d_H:i:s:u');
 
-			$etag = base64_encode($code . '.' . $key . '.' . $time);
+			$etag = "\"" . base64_encode($code . '.' . $key . '.' . $time) . "\"";
 			return $this->setEtag($etag);
 		}
 
@@ -121,17 +133,18 @@
 		 */
 		public function getPlayloadEtag($response): array
 		{
-			if ($response instanceof JsonResponse || $response instanceof Response) {
-				$etag = base64_decode($this->getEtag($response));
-				list($code, $key, $time) = explode('.', $etag);
+			$playloads = [];
+			$etag = $this->getEtag($response);
+			foreach ($etag as $item){
+				list($code,$key,$timestamp) = explode('.', base64_decode($item));
 				$playload = [
-					'code' => $code,
-					'key' => $key,
-					'time' => $time
+					"code" => $code,
+					"key" => $key,
+					"timestamp" => $timestamp
 				];
-				return $playload;
+				array_push($playloads, $playload);
 			}
-			return [];
+			return $playloads?:[];
 		}
 
 		/**
@@ -140,11 +153,11 @@
 		 * @param $response
 		 * @return string
 		 */
-		public function getEtag($response): string
+		public function getEtag($response) :array
 		{
 			if ($response instanceof JsonResponse || $response instanceof Response)
-				return $response->headers->get('etag');
-			return '';
+				return explode(', ', str_replace('"','',$response->headers->get('etag')));
+			return [];
 		}
 
 		/**
@@ -158,4 +171,34 @@
 			$this->etag = $etag;
 			return $this;
 		}
+
+		/**
+		 * @param Request $request
+		 * @param $response
+		 * @return bool
+		 */
+		public function ifNoneMatch(Request $request, $response): object
+		{
+			$resposeEtag = $this->getEtag($response);
+			$requestEtag = $request->header('If-None-Match');
+
+			return $requestEtag === $resposeEtag ? $this->notModified() : $response;
+		}
+
+		/**
+		 * @param Request $request
+		 * @param $response
+		 * @return bool
+		 */
+		public function ifMatch(Request $request, $response): object
+		{
+			$resposeEtag = $this->getEtag($response);
+			$requestEtag = $request->header('If-Match');
+
+			return $requestEtag === $resposeEtag ? $response : $this->errorPreconditionFailed();
+		}
+
+		public function ifModifiedSince(Request $request, $response) {}
+
+		public function ifUnmodifiedSince(Request $request, $response) {}
 	}

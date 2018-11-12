@@ -116,6 +116,19 @@
 		}
 
 		/**
+		 * Alias for not modified Response
+		 *
+		 * @param string $content
+		 * @param int $status
+		 * @param array $headers
+		 * @param int $options
+		 * @return JsonResponse
+		 */
+		public function notModified(array $headers = [], $options = 0) {
+			return $this->response([], 304, $headers, $options);
+		}
+
+		/**
 		 * Alias error for badRequest
 		 *
 		 * @param string $content
@@ -220,6 +233,20 @@
 		public function errorRequestTimeout($content = "Error Request Timeout", int $status = 408, array $headers = [], $options = 0)
 		{
 			return $this->error($content, $status, $headers, $options);
+		}
+
+		/**
+		 * Alias error for Precondition Failed
+		 *
+		 * @param string $content
+		 * @param int $status
+		 * @param array $headers
+		 * @param int $options
+		 * @return JsonResponse
+		 */
+		public function errorPreconditionFailed($content = "Error Precondition Failed", int $status = 412, array $headers = [], $options = 0)
+		{
+			return $this->error($content, $status, $headers, $options); //@TODO delete links in this error response
 		}
 
 		/**
