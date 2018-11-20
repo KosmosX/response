@@ -8,78 +8,10 @@
 	use Illuminate\Http\Response;
 	use Illuminate\Support\Facades\Crypt;
 
-	trait HeadersREST
+	trait ConditionalHeaders
 	{
-		private $cacheHeaders;
-		private $lastModified;
-		private $etag;
-
-		/**
-		 * @return $this
-		 */
-		public function setCachePrivate(): object
-		{
-			$this->cacheProcesor('private');
-			return $this;
-		}
-
-		/**
-		 * @param string $name
-		 */
-		private function cacheProcesor(string $name)
-		{
-			if ($this->cacheHeaders)
-				$this->cacheHeaders .= ', ' . $name;
-			else
-				$this->cacheHeaders .= $name;
-		}
-
-		/**
-		 * @return $this
-		 */
-		public function setCachePublic(): object
-		{
-			$this->cacheProcesor('public');
-			return $this;
-		}
-
-		/**
-		 * @return $this
-		 */
-		public function setCacheNoStore(): object
-		{
-			$this->cacheProcesor('no-store');
-			return $this;
-		}
-
-		/**
-		 * @return $this
-		 */
-		public function setCacheNoCache(): object
-		{
-			$this->cacheProcesor('no-cache');
-			return $this;
-		}
-
-		/**
-		 * @param int $time
-		 * @return $this
-		 */
-		public function setCacheMaxAge(int $time = 3600): object
-		{
-			$this->cacheProcesor('max-age=' . $time);
-			return $this;
-		}
-
-		/**
-		 * @param string $cache
-		 * @return $this
-		 */
-		public function setCache(string $cache): object
-		{
-			$this->cacheProcesor($cache);
-			return $this;
-		}
+		protected $lastModified;
+		protected $etag;
 
 		/**
 		 * @param Carbon $data
@@ -95,7 +27,7 @@
 		 * @param $response
 		 * @return string
 		 */
-		public function geLastModified($response): string
+		public function getLastModified($response): string
 		{
 			if ($response instanceof JsonResponse || $response instanceof Response)
 				return $response->headers->get('last-modified');
@@ -135,8 +67,8 @@
 		{
 			$playloads = [];
 			$etag = $this->getEtag($response);
-			foreach ($etag as $item){
-				list($code,$key,$timestamp) = explode('.', base64_decode($item));
+			foreach ($etag as $item) {
+				list($code, $key, $timestamp) = explode('.', base64_decode($item));
 				$playload = [
 					"code" => $code,
 					"key" => $key,
@@ -144,7 +76,7 @@
 				];
 				array_push($playloads, $playload);
 			}
-			return $playloads?:[];
+			return $playloads;
 		}
 
 		/**
@@ -153,10 +85,10 @@
 		 * @param $response
 		 * @return string
 		 */
-		public function getEtag($response) :array
+		public function getEtag($response): array
 		{
 			if ($response instanceof JsonResponse || $response instanceof Response)
-				return explode(', ', str_replace('"','',$response->headers->get('etag')));
+				return explode(', ', str_replace('"', '', $response->headers->get('etag')));
 			return [];
 		}
 
@@ -192,13 +124,53 @@
 		 */
 		public function ifMatch(Request $request, $response): object
 		{
-			$resposeEtag = $this->getEtag($response);
-			$requestEtag = $request->header('If-Match');
+			$matched = false;
+			$etag = $this->getEtag($response);
+			foreach ($etag as $item)
+				$matched = $request->header('If-Match') === $this->getEtag($response) ? true : $matched;
 
-			return $requestEtag === $resposeEtag ? $response : $this->errorPreconditionFailed();
+			if (!$matched) {
+				if ($request->method() == 'GET')
+					return $this->forced()->errorRangeNotSatisfiable();
+				else
+					return $this->forced()->errorPreconditionFailed();
+			}
+			return $response;
 		}
 
-		public function ifModifiedSince(Request $request, $response) {}
+		/**
+		 * Method to check If-Modified-Since
+		 *
+		 * @param \Illuminate\Http\Request $request
+		 * @param                          $response
+		 *
+		 * @return mixed
+		 */
+		public function ifModifiedSince(Request $request, $response) {
+			$responseSince = $this->getLastModified($response);
+			$requestSince = $request->header('If-Modified-Since');
 
-		public function ifUnmodifiedSince(Request $request, $response) {}
+			if ($responseSince > $requestSince)
+				return $this->response('', 200);
+			else
+				return $this->notModified();
+		}
+
+		/**
+		 * Method to check If-Unmodified-Since
+		 *
+		 * @param \Illuminate\Http\Request $request
+		 * @param                          $response
+		 *
+		 * @return mixed
+		 */
+		public function ifUnmodifiedSince(Request $request, $response) {
+			$responseSince = $this->getLastModified($response);
+			$requestSince = $request->header('If-Unmodified-Since');
+
+			if ($responseSince > $requestSince)
+				return $this->forced()->errorPreconditionFailed();
+			else
+				return $response;
+		}
 	}

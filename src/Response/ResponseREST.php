@@ -8,14 +8,10 @@
 
 	namespace ResponseHTTP\Response;
 
-	use ResponseHTTP\Response\Traits\HeadersREST;
 	use Carbon\Carbon;
-	use Symfony\Component\HttpKernel\Exception\HttpException;
 
 	class ResponseREST extends ResponseService
 	{
-		use HeadersREST;
-
 		/**
 		 * Method response
 		 *
