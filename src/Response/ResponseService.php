@@ -13,13 +13,9 @@
 	class ResponseService extends ResponseAbstract
 	{
 		public function response($content, $status, array $headers = [], $options = 0) {
-			array_push($headers, $this->headers);
+			$this->setHeaders($headers);
+			$this->setInstance();
 			return response()->json($content, $status, $headers, $options);
-		}
-
-		public function success($content = 'true', $status = 200, array $headers = [], $options = 0) {
-			$message = $this->contentProcessor($content, 'success');
-			return $this->response($message, $status, $headers, $options);
 		}
 
 		public function data($content = "", $status = 200, array $headers = [], $options = 0) {
@@ -31,13 +27,30 @@
 			return $this->response([], 304, $headers, $options);
 		}
 
-		public function errorBadRequest($content = "Bad Request", int $status = 400, array $headers = [], $options = 0) {
-			return $this->error($content, $status, $headers, $options);
+		public function success($content = 'OK', $status = 200, array $headers = [], $options = 0) {
+			$message = $this->contentProcessor($content, 'success');
+			return $this->response($message, $status, $headers, $options);
+		}
+
+		public function successCreated($content = 'Resource Created', $status = 201, array $headers = [], $options = 0) {
+			return $this->success($content, $status, $headers, $options);
+		}
+
+		public function successAccepted($content = 'Request Accepted', $status = 202, array $headers = [], $options = 0) {
+			return $this->success($content, $status, $headers, $options);
+		}
+
+		public function successNoContent($content = 'No Content response', $status = 204, array $headers = [], $options = 0) {
+			return $this->success($content, $status, $headers, $options);
 		}
 
 		public function error($content = "Generic Error", int $status = 400, array $headers = [], $options = 0) {
 			$message = $this->contentProcessor($content, 'error');
 			return $this->response($message, $status, $headers, $options);
+		}
+
+		public function errorBadRequest($content = "Bad Request", int $status = 400, array $headers = [], $options = 0) {
+			return $this->error($content, $status, $headers, $options);
 		}
 
 		public function errorUnauthorized($content = "Unauthorized", int $status = 401, array $headers = [], $options = 0) {

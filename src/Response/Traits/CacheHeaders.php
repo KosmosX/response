@@ -4,7 +4,16 @@
 
 	trait CacheHeaders
 	{
-		protected $cacheHeaders;
+		/**
+		 * @param string $name
+		 */
+		private function cacheProcesor(string $name)
+		{
+			if (array_key_exists('cache-control', $this->headers))
+				$this->headers['cache-control'] .= ', ' . $name;
+			else
+				array_set($this->headers,'cache-control', $name);
+		}
 
 		/**
 		 * @return $this
@@ -13,17 +22,6 @@
 		{
 			$this->cacheProcesor('private');
 			return $this;
-		}
-
-		/**
-		 * @param string $name
-		 */
-		private function cacheProcesor(string $name)
-		{
-			if ($this->cacheHeaders)
-				$this->cacheHeaders .= ', ' . $name;
-			else
-				$this->cacheHeaders .= $name;
 		}
 
 		/**

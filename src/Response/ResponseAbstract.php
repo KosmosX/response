@@ -32,8 +32,12 @@
 			$this->forced = false;
 		}
 
-		protected function instance () {
+		protected function setInstance() {
 			self::__construct();
+		}
+
+		protected function setHeaders(&$headers) {
+			$headers += $this->headers;
 		}
 
 		/**
@@ -44,14 +48,12 @@
 		 * @return array
 		 */
 		protected function contentProcessor($content, string $type): array {
-			$default = $this->default($type);
+			$default = $this->contentData($type);
 
 			if ($this->subArray)
 				$default[$type] = array_add($default[$type], $this->subArray, $content);
 			else
 				array_set($default, $type, $content);
-
-			$this->instance();
 
 			return $default;
 		}
@@ -62,21 +64,18 @@
 		 * @param string $type
 		 * @return array
 		 */
-		protected function default(string $type): array {
+		protected function contentData(string $type): array {
 			$default = [$type => []];
 
-			if ($this->forced)
-				return $default;
-
-			if ($this->data)
-				$default += ["data" => $this->data];
-			if ($this->links)
-				$default += ["links" => $this->links];
-			if ($this->elements)
-				$default += $this->elements;
-
+			if (!$this->forced) {
+				if ($this->data)
+					$default += ["data" => $this->data];
+				if ($this->links)
+					$default += ["links" => $this->links];
+				if ($this->elements)
+					$default += $this->elements;
+			}
 			return $default;
-
 		}
 
 		/**
@@ -186,7 +185,7 @@
 		 */
 		public function withHeaders(array $headers): ResponseService
 		{
-			$this->headers = $headers;
+			$this->headers += $headers;
 			return $this;
 		}
 

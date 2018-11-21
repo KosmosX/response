@@ -29,14 +29,7 @@
 		 */
 		protected function registerAlias()
 		{
-			$aliases = [
-				'Response' => \ResponseHTTP\Response\Facades\ResponseFacade::class,
-				'ResponseREST' => \ResponseHTTP\Response\Facades\ResponseRESTFacade::class,
-			];
-
-			foreach ($aliases as $key => $value) {
-				class_alias($value, $key);
-			}
+			class_alias(\ResponseHTTP\Response\Facades\ResponseFacade::class, 'Response');
 		}
 
 		/**
@@ -48,7 +41,6 @@
 			 * Service Response
 			 */
 			$this->app->singleton('service.response', 'ResponseHTTP\Response\ResponseService');
-			$this->app->singleton('service.response.rest', 'ResponseHTTP\Response\ResponseREST');
 		}
 
 		/**

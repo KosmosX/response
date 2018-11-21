@@ -30,7 +30,43 @@
 		 * @param int $options
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function success($content = 'true', $status = 200, array $headers = [], $options = 0);
+		public function success($content = 'OK', $status = 200, array $headers = [], $options = 0);
+
+		/**
+		 * Alias success for Resource created
+		 *
+		 * @param string $content
+		 * @param int    $status
+		 * @param array  $headers
+		 * @param int    $options
+		 *
+		 * @return mixed
+		 */
+		public function successCreated($content = 'Resource Created', $status = 201, array $headers = [], $options = 0);
+
+		/**
+		 * Alias success for Request Accepted
+		 *
+		 * @param string $content
+		 * @param int    $status
+		 * @param array  $headers
+		 * @param int    $options
+		 *
+		 * @return mixed
+		 */
+		public function successAccepted($content = 'Request Accepted', $status = 202, array $headers = [], $options = 0);
+
+		/**
+		 * Alias success for No content response
+		 *
+		 * @param string $content
+		 * @param int    $status
+		 * @param array  $headers
+		 * @param int    $options
+		 *
+		 * @return mixed
+		 */
+		public function successNoContent($content = 'No Content response', $status = 204, array $headers = [], $options = 0);
 
 		/**
 		 * Method for data responses
