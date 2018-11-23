@@ -8,36 +8,26 @@
 
 	namespace ResponseHTTP\Response;
 
-	use Illuminate\Database\Eloquent\Model;
-	use ResponseHTTP\Response\Traits\CacheHeaders;
-	use ResponseHTTP\Response\Traits\ConditionalHeaders;
+	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 
-	abstract class ResponseAbstract implements ResponseInterface
+	class ResponseAbstract extends BaseJsonResponse
 	{
-		use CacheHeaders, ConditionalHeaders;
+		protected static $original = [
+			'data' => [],
+			'links' => [],
+		];
+		protected $options;
 
-		protected $data;
-		protected $links;
-		protected $elements;
-		protected $headers;
-		protected $subArray;
-		protected $forced;
-
-		public function __construct() {
-			$this->data = [];
-			$this->links = [];
-			$this->elements = [];
-			$this->headers = [];
-			$this->subArray = '';
-			$this->forced = false;
+		public function __construct($data = NULL, int $status = 200, array $headers = array(), bool $json = false)
+		{
+			$this->options = $json;
+			parent::__construct($data, $status, $headers, $json);
 		}
 
-		protected function setInstance() {
-			self::__construct();
-		}
-
-		protected function setHeaders(&$headers) {
-			$headers += $this->headers;
+		protected function dispatcher(string $type, ...$construct) {
+			list($content,$status,$headers,$json) = $construct;
+			$content = $this->contentProcessor($content,$type);
+			self::__construct($content,$status,$headers,$json);
 		}
 
 		/**
@@ -48,34 +38,52 @@
 		 * @return array
 		 */
 		protected function contentProcessor($content, string $type): array {
-			$default = $this->contentData($type);
+			$this->content = [$type => $content];
 
-			if ($this->subArray)
-				$default[$type] = array_add($default[$type], $this->subArray, $content);
-			else
-				array_set($default, $type, $content);
+			foreach (self::$original as $key => $item)
+				if(count($item)){
+					$el = array_pop($item);
+					if (array_key_exists($key,$this->content))
+						$this->content[$key] += [key($el) => array_values($el)];
+					else
+						$this->content += [$key => array_pop($item)];
+				}
 
-			return $default;
+			return $this->getContent();
 		}
 
 		/**
-		 * Method make array REST response
+		 * Set a header on the Response.
 		 *
-		 * @param string $type
-		 * @return array
+		 * @param  string  $key
+		 * @param  array|string  $values
+		 * @param  bool    $replace
+		 * @return $this
 		 */
-		protected function contentData(string $type): array {
-			$default = [$type => []];
+		public function withHeader($key, $values, $replace = true)
+		{
+			$this->headers->set($key, $values, $replace);
 
-			if (!$this->forced) {
-				if ($this->data)
-					$default += ["data" => $this->data];
-				if ($this->links)
-					$default += ["links" => $this->links];
-				if ($this->elements)
-					$default += $this->elements;
+			return $this;
+		}
+
+		/**
+		 * Add an array of headers to the response.
+		 *
+		 * @param  \Symfony\Component\HttpFoundation\HeaderBag|array  $headers
+		 * @return $this
+		 */
+		public function withHeaders($headers)
+		{
+			if ($headers instanceof HeaderBag) {
+				$headers = $headers->all();
 			}
-			return $default;
+
+			foreach ($headers as $key => $value) {
+				$this->headers->set($key, $value);
+			}
+
+			return $this;
 		}
 
 		/**
@@ -86,25 +94,7 @@
 		 */
 		public function addData(array $data): ResponseService
 		{
-			$this->data = $data;
-			return $this;
-		}
-
-		/**
-		 * Adds to links array a default links array of model
-		 *
-		 * @param Model $model
-		 * @param bool $hateoas
-		 * @return ResponseService
-		 */
-		public function addModelLinks(Model $model, $hateoas = true) :ResponseService
-		{
-			if ($model instanceof Model && method_exists($model, 'getLinks')){
-				$links = $model->getLinks();
-				if ($links)
-					$this->addLinks($links, $hateoas);
-			}
-
+			array_push(self::$original['data'], $data);
 			return $this;
 		}
 
@@ -145,9 +135,9 @@
 					"href" => array_key_exists(1, $link) ? $link[1] : null,
 					"method" => array_key_exists(2, $link) ? $link[2] : null,
 				];
-				array_push($this->links, $filtered);
+				array_push(self::$original['links'], [$filtered]);
 			} else
-				array_push($this->links, $link);
+				array_push(self::$original['links'], [$link]);
 			return $this;
 		}
 
@@ -160,42 +150,11 @@
 		 * @param array $item
 		 * @return $this
 		 */
-		public function addElements(array $item): ResponseService {
-			$this->elements += $item;
-			return $this;
-		}
+		public function addElements(array $elements, bool $override = true): ResponseService {
+			foreach ($elements as $key => $element)
+				if (true === $override || !array_key_exists($key,self::$original))
+					self::$original += [$key => $element];
 
-		/**
-		 * Method to add sub array in error or success response
-		 *
-		 * @param string $subArray
-		 * @return $this
-		 */
-		public function withIncapsulated(string $subArray): ResponseService
-		{
-			$this->subArray = $subArray;
-			return $this;
-		}
-
-		/**
-		 * Add headers to headers response
-		 *
-		 * @param array $headers
-		 * @return $this
-		 */
-		public function withHeaders(array $headers): ResponseService
-		{
-			$this->headers += $headers;
-			return $this;
-		}
-
-		/**
-		 * Forced skip add method
-		 *
-		 * @return $this
-		 */
-		public function forced():ResponseService {
-			$this->forced = true;
 			return $this;
 		}
 	}

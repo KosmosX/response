@@ -25,7 +25,7 @@
 			$response = $next($request);
 			foreach($headers as $key => $value)
 			{
-				$response->header($key, $value);
+				$response->headers->set($key, $value);
 			}
 
 			return $response;

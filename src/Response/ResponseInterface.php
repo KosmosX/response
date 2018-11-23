@@ -11,8 +11,6 @@
 
 	interface ResponseInterface
 	{
-		public function response($content, $status, array $headers = [], $options = 0);
-
 		/**
 		 * Method for successful responses
 		 * If you add data use method ->withData($data);
