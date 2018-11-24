@@ -21,7 +21,6 @@
 		{
 			$this->registerAlias();
 			$this->registerServices();
-			$this->registerMiddleware();
 		}
 
 		/**
@@ -29,7 +28,7 @@
 		 */
 		protected function registerAlias()
 		{
-			class_alias(\ResponseHTTP\Response\Facades\ResponseFacade::class, 'Response');
+			class_alias(\ResponseHTTP\Response\Facades\ResponseFacade::class, 'HttpResponse');
 		}
 
 		/**
@@ -40,16 +39,6 @@
 			/**
 			 * Service Response
 			 */
-			$this->app->singleton('service.response', 'ResponseHTTP\Response\ResponseService');
-		}
-
-		/**
-		 * Register middleware
-		 */
-		protected function registerMiddleware()
-		{
-			$this->app->middleware([
-				\ResponseHTTP\Response\Middleware\CorsMiddleware::class
-			]);
+			$this->app->singleton('service.response', 'ResponseHTTP\Response\HttpResponse');
 		}
 	}
