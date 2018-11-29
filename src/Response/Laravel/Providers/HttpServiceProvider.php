@@ -6,7 +6,7 @@
 	 * Time: 13.19
 	 */
 
-	namespace ResponseHTTP;
+	namespace ResponseHTTP\Response\Laravel\Providers;
 
 	use Illuminate\Support\ServiceProvider;
 
@@ -28,7 +28,7 @@
 		 */
 		protected function registerAlias()
 		{
-			class_alias(\ResponseHTTP\Response\Facades\ResponseFacade::class, 'HttpResponse');
+			class_alias(\ResponseHTTP\Response\Laravel\Facades\ResponseFacade::class, 'HttpResponse');
 		}
 
 		/**

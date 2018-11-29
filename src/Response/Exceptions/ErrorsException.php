@@ -7,11 +7,20 @@
 	 */
 	namespace ResponseHTTP\Response\Exceptions;
 
-	use Response;
-	use Exception;
+	use HttpResponse;
 
-	class ErrorsException extends Exception {
-		public function exception ($content, $status = 400, array $headers = [], $code = 0) {
-			return Response::errorException($content, $status, null, $headers, $code);
+	class ErrorsException extends \Exception {
+		/**
+		 * Exception response call HttpResponse
+		 *
+		 * @param       $content
+		 * @param int   $status
+		 * @param array $headers
+		 * @param int   $code
+		 *
+		 * @return mixed
+		 */
+		public static function exception ($content, $status = 400, array $headers = [], $code = 0) {
+			return HttpResponse::errorException($content, $status, null, $headers, $code);
 		}
 	}
