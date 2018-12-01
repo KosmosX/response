@@ -7,7 +7,7 @@
 	 */
 	namespace ResponseHTTP\Response\Exceptions;
 
-	use HttpResponse;
+	use ResponseHTTP\Response\HttpResponse;
 
 	class ErrorsException extends \Exception {
 		/**

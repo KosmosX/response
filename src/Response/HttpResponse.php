@@ -88,7 +88,7 @@
 			return $this->error($content, $status, $headers, $json);
 		}
 
-		public function errorException($content, $status = 400, array $headers = array(), $code = 0) {
+		public static function errorException($content, $status = 400, array $headers = array(), $code = 0) {
 			throw new HttpException($status, $content, null, $headers, $code);
 		}
 	}

@@ -251,5 +251,5 @@
 		 * @param array $headers
 		 * @param int   $code
 		 */
-		public function errorException($content, $status = 400, array $headers = array(), $code = 0);
+		public static function errorException($content, $status = 400, array $headers = array(), $code = 0);
 	}
