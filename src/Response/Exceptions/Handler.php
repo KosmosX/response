@@ -32,7 +32,8 @@
 		 *
 		 * @return \ResponseHTTP\Response\HttpResponse
 		 */
-		public function handle(\Exception $e) {
+		public function handle(\Exception $e)
+		{
 			$status = 400;
 			$headers = [];
 			$content = [
@@ -42,19 +43,17 @@
 				],
 			];
 
-			if($e instanceof \HttpException) {
+			if ($e instanceof \HttpException) {
 				$status = $e->getStatusCode();
 				$headers = $e->getHeaders();
 				$content['error'] = array_add($content['error'], 'status_code', $status);
 			}
 
-			if(getenv('RESPONSE_DEBUG')?:true){
-				$content['error'] = array_add($content['error'], 'debug.file', $e->getFile());
-				$content['error'] = array_add($content['error'], 'debug.line', $e->getLine());
-				$content['error'] = array_add($content['error'], 'debug.trace', $e->getTraceAsString());
+			if (getenv('RESPONSE_DEBUG') ?: true) {
+				$content['error']['debug'] = array_combine(array('file', 'line', 'trace'), array($e->getFile(), $e->getLine(), $e->getTraceAsString()));
 			}
 
-			return new HttpResponse($content, $status,$headers,false);
+			return new HttpResponse($content, $status, $headers, false);
 		}
 
 		/**
@@ -64,9 +63,10 @@
 		 *
 		 * @return callable|null
 		 */
-		public function setExceptionHandler(\Closure $callable = null) {
-			if(null === $callable)
-				$callable = array(__CLASS__,'handle');
+		public function setExceptionHandler(\Closure $callable = NULL)
+		{
+			if (NULL === $callable)
+				$callable = array(__CLASS__, 'handle');
 
 			self::$prev = set_exception_handler($callable);
 
@@ -78,12 +78,13 @@
 		 *
 		 * @return callable|null
 		 */
-		public function setPrevExceptionHandler() {
-			if(null === self::$prev)
-				self::$prev = set_exception_handler(null);
+		public function setPrevExceptionHandler()
+		{
+			if (NULL === self::$prev)
+				self::$prev = set_exception_handler(NULL);
 
 			$handler = self::$handler;
-			self::$handler  = self::$prev;
+			self::$handler = self::$prev;
 			self::$prev = $handler;
 
 			restore_exception_handler();
@@ -96,7 +97,8 @@
 		 *
 		 * @return mixed
 		 */
-		public function getPrev(){
+		public function getPrev()
+		{
 			return self::$prev;
 		}
 
@@ -105,7 +107,8 @@
 		 *
 		 * @return mixed
 		 */
-		public function getHandler(){
+		public function getHandler()
+		{
 			return self::$handler;
 		}
 	}
