@@ -8,10 +8,13 @@
 
 	namespace ResponseHTTP\Response;
 
+	use ResponseHTTP\Response\Traits\ConditionalHeaders;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 
 	class HttpResponse extends BaseHttpResponse implements HttpResponseInterface
 	{
+		use ConditionalHeaders;
+
 		public function data($content = NULL, $status = 200, array $headers = array(), $json = false) {
 			$this->dispatcher('data', $content, $status, $headers, $json);
 			return $this;

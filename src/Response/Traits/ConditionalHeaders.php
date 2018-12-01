@@ -12,36 +12,14 @@
 	trait ConditionalHeaders
 	{
 		/**
-		 * @param Carbon $data
-		 * @return $this
-		 */
-		public function setLastModified(Carbon $data = null): object
-		{
-			if(!$data)
-				$data = Carbon::now();
-
-			array_set($this->headers,'last-modified', $data->toRfc7231String());
-			return $this;
-		}
-
-		/**
-		 * @param $response
-		 * @return string
-		 */
-		public function getLastModified(BaseResponse $response): string
-		{
-			return $response->headers->get('last-modified');
-		}
-
-		/**
 		 * Method to retrive original etag without base64_decode
 		 *
 		 * @param $response
 		 * @return string
 		 */
-		public function getEtag(BaseResponse $response): array
+		public function getEtagss(): array
 		{
-			return $this->explodeEtag($response->headers->get('etag'));
+			return $this->explodeEtag($this->headers->get('ETag'));
 		}
 
 		/**
@@ -50,10 +28,10 @@
 		 * @param $response
 		 * @return array
 		 */
-		public function getPlayloadEtag($response): array
+		public function getPlayloadEtag(): array
 		{
 			$playloads = [];
-			$etag = $this->getEtag($response);
+			$etag = $this->getEtagss();
 			foreach ($etag as $item) {
 				list($code, $key, $timestamp) = explode('.', base64_decode($item));
 				$playload = [
@@ -80,42 +58,11 @@
 		 * @param string $code
 		 * @return $this|object
 		 */
-		public function setEtagPlayload(string $key = '', string $code = '0x'): object
+		public function setEtagPlayload(string $key = '', string $code = '0x', bool $weak = false): object
 		{
 			$key = $key ?: str_random(10);
-			$time = Carbon::now()->format('Y-m-d_H:i:s:u');
-
-			$etag = "\"" . base64_encode($code . '.' . $key . '.' . $time) . "\"";
-			return $this->setEtag($etag);
-		}
-
-		/**
-		 * Set etag with forced value
-		 *
-		 * @param string $etag
-		 *
-		 * @return object
-		 */
-		public function setEtagForced(string $etag): object
-		{
-			$this->setEtag($etag);
-			return $this;
-		}
-
-		/**
-		 * Set etag
-		 *
-		 * @param string $etag
-		 * @return $this
-		 */
-		public function setEtag(string $etag = ''): object
-		{
-			if($etag)
-				array_set($this->headers,'etag',$etag);
-			else
-				$this->setEtagPlayload();
-
-			return $this;
+			$etag = base64_encode($code . '.' . $key . '.' . date("Y-m-d H:i:s"));
+			return $this->setEtag($etag,$weak);
 		}
 
 		/**
@@ -127,8 +74,8 @@
 		 */
 		public function ifNoneMatch(Request $request, BaseResponse $response): object
 		{
-			$resposeEtag = $this->getEtag($response);
-			$requestEtag = $request->header('If-None-Match');
+			$resposeEtag = $this->getEtags($response);
+			$requestEtags = $request->header('If-None-Match');
 
 			foreach ($requestEtags as $requestEtag)
 				if (in_array($requestEtag,$resposeEtag))
@@ -146,7 +93,7 @@
 		 */
 		public function ifMatch(Request $request, BaseResponse $response): object
 		{
-			$responseEtags = $this->getEtag($response);
+			$responseEtags = $this->getEtags($response);
 			$requestEtags = $this->explodeEtag($request->header('If-Match'));
 
 			foreach ($requestEtags as $requestEtag) {
