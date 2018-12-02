@@ -63,10 +63,14 @@
 
 
 		/**
+		 * Add element to content response
+		 *
 		 * @param string $type
 		 * @param array  $content
+		 * @param bool   $override
+		 * @param bool   $json
 		 *
-		 * @return $this
+		 * @return \ResponseHTTP\Response\BaseHttpResponse
 		 */
 		public function withContent(string $type = 'content', $content = array(), bool $override = false, bool $json = false) :BaseHttpResponse{
 
@@ -86,8 +90,10 @@
 		 * Example $item:
 		 * ['output' => value] or ['output' => value, 'message' => value]
 		 *
-		 * @param array $item
-		 * @return $this
+		 * @param array $contents
+		 * @param bool  $override
+		 *
+		 * @return \ResponseHTTP\Response\BaseHttpResponse
 		 */
 		public function withContents(array $contents, bool $override = false): BaseHttpResponse {
 			foreach ($contents as $type => $content)
@@ -159,10 +165,55 @@
 			if (empty($_fields))
 				return array_filter(self::$original);
 
-			$original = array();
-			foreach ($_fields as $field) {
-				array_key_exists($field, self::$original) ? $original[$field] = self::$original[$field] : NULL;
+			return $this->search(self::$original,false, $_fields);
+		}
+
+		/**
+		 * @return mixed
+		 */
+		public function getData(bool $json = false, string ...$_fields)
+		{
+			if (!empty($_fields))
+				return $this->search($this->data,true, $_fields);
+
+			if($json)
+				return $this->data;
+
+			return json_decode($this->data,true);
+		}
+
+		/**
+		 * Override getContent method
+		 *
+		 * @param bool $parent
+		 *
+		 * @return mixed|string
+		 */
+		public function getContent(bool $json = false, string ...$_fields)
+		{
+			if (!empty($_fields))
+				return $this->search($this->content,true, $_fields);
+
+			if($json)
+				return $this->content;
+			return json_decode($this->content,true);
+		}
+
+		/**
+		 * @param array  $data
+		 * @param bool   $json
+		 * @param string ...$_gets
+		 *
+		 * @return array
+		 */
+		protected function search($data = array(), bool $json = false, ...$_gets):array {
+			if($json)
+				$data = json_decode($data,true);
+
+			$found = array();
+			foreach ($_gets as $str) {
+				array_key_exists($str[0], $data) ? $found[$str[0]] = $data[$str[0]] : NULL;
 			}
-			return $original;
+			return $found;
 		}
 	}
