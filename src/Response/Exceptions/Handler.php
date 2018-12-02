@@ -36,6 +36,7 @@
 		{
 			$status = 400;
 			$headers = [];
+			$env = (getenv('RESPONSE_DEBUG') === "true" ? true : false);
 			$content = [
 				'error' => [
 					'message' => $e->getMessage(),
@@ -49,7 +50,7 @@
 				$content['error'] = array_add($content['error'], 'status_code', $status);
 			}
 
-			if (getenv('RESPONSE_DEBUG') ?: true) {
+			if ($env) {
 				$content['error']['debug'] = array_combine(array('file', 'line', 'trace'), array($e->getFile(), $e->getLine(), $e->getTraceAsString()));
 			}
 

@@ -8,10 +8,12 @@
 
 	namespace ResponseHTTP\Response;
 
+	use ResponseHTTP\Response\Traits\ConditionalHeaders;
 	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 
 	class BaseHttpResponse extends BaseJsonResponse
 	{
+
 		protected static $original = [];
 
 		protected function dispatcher(string $type, ...$construct) {
@@ -71,7 +73,7 @@
 			if (array_key_exists($type,self::$original))
 				self::$original[$type] = $override ?  $content : array(self::$original[$type], $content);
 			else
-				self::$original += [$type => $content];
+				self::$original += array($type => $content);
 
 			$json ? $this->setJson(self::$original) : $this->setData(self::$original);
 
@@ -153,14 +155,14 @@
 		 *
 		 * @return array
 		 */
-		public function getOriginal(...$fields) :array {
-			if (!empty($fields)) {
-				$original = array();
-				foreach ($fields as $field) {
-					array_key_exists($field, self::$original) ? $original[$field] = self::$original[$field] : NULL;
-				}
-				return array_filter($original);
+		public function getOriginal(string ...$_fields) :array {
+			if (empty($_fields))
+				return array_filter(self::$original);
+
+			$original = array();
+			foreach ($_fields as $field) {
+				array_key_exists($field, self::$original) ? $original[$field] = self::$original[$field] : NULL;
 			}
-			return array_filter(self::$original);
+			return $original;
 		}
 	}
