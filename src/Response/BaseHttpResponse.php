@@ -76,7 +76,7 @@
 			if (!array_key_exists($type,self::$original) || $override)
 				self::$original[$type] = $content;
 			else
-				self::$original[$type] =  array_merge(self::$original[$type],is_array($content)?$content:array($content));
+				self::$original[$type] =  array_merge(is_array(self::$original[$type])?self::$original[$type]:array(self::$original[$type]),is_array($content)?$content:array($content));
 
 			$json ? $this->setJson(self::$original) : $this->setData(self::$original);
 
