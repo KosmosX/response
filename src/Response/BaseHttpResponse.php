@@ -73,11 +73,10 @@
 		 * @return \ResponseHTTP\Response\BaseHttpResponse
 		 */
 		public function withContent(string $type = 'content', $content = array(), bool $override = false, bool $json = false) :BaseHttpResponse{
-
-			if (array_key_exists($type,self::$original))
-				self::$original[$type] = $override ?  $content : array(self::$original[$type], $content);
+			if (!array_key_exists($type,self::$original) || $override)
+				self::$original[$type] = $content;
 			else
-				self::$original += array($type => $content);
+				self::$original[$type] =  array_merge(self::$original[$type],is_array($content)?$content:array($content));
 
 			$json ? $this->setJson(self::$original) : $this->setData(self::$original);
 
@@ -144,15 +143,17 @@
 		 */
 		public function withLink(array $link, bool $hateoas = true): BaseHttpResponse
 		{
-			$processed = array();
 			if ($hateoas) {
-				$processed = [
-					"rel" => array_key_exists(0, $link) ? $link[0] : null,
-					"href" => array_key_exists(1, $link) ? $link[1] : null,
-					"method" => array_key_exists(2, $link) ? $link[2] : null,
-				];
+				list($processed['rel'], $processed['href'], $processed['method']) = array_pad(array_values($link),3,'');
+				$link = $processed;
+				unset($processed);
 			}
-			$this->withContent('links',$processed?:$link);
+
+			if(!array_key_exists('links',self::$original))
+				self::$original['links'] = array($link);
+			else
+				self::$original['links'] = array_merge(self::$original['links'],array($link));
+
 			return $this;
 		}
 
@@ -162,10 +163,10 @@
 		 * @return array
 		 */
 		public function getOriginal(string ...$_fields) :array {
-			if (empty($_fields))
-				return array_filter(self::$original);
+			if (!empty($_fields))
+				return $this->search(self::$original,false, $_fields);
 
-			return $this->search(self::$original,false, $_fields);
+			return array_filter(self::$original);
 		}
 
 		/**
@@ -177,9 +178,9 @@
 				return $this->search($this->data,true, $_fields);
 
 			if($json)
-				return $this->data;
+				return json_decode($this->data,true);
 
-			return json_decode($this->data,true);
+			return $this->data;
 		}
 
 		/**
@@ -195,8 +196,8 @@
 				return $this->search($this->content,true, $_fields);
 
 			if($json)
-				return $this->content;
-			return json_decode($this->content,true);
+				return json_decode($this->content,true);
+			return $this->content;
 		}
 
 		/**
