@@ -24,7 +24,8 @@
 
 			if (null === $content)
 				$content = array_key_exists((string)$status,self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
-			$this->withContent($type,$content,false,$json);
+
+			$this->withContent($type, $content,false, $json);
 		}
 
 		/**
@@ -38,7 +39,6 @@
 		public function withHeader($key, $values, $replace = true) :BaseHttpResponse
 		{
 			$this->headers->set($key, $values, $replace);
-
 			return $this;
 		}
 
@@ -73,12 +73,15 @@
 		 * @return \ResponseHTTP\Response\BaseHttpResponse
 		 */
 		public function withContent(string $type = 'content', $content = array(), bool $override = false, bool $json = false) :BaseHttpResponse{
-			if (!array_key_exists($type,self::$original) || $override)
+			if (!array_key_exists($type,self::$original) || $override) {
 				self::$original[$type] = $content;
-			else
-				self::$original[$type] =  array_merge(is_array(self::$original[$type])?self::$original[$type]:array(self::$original[$type]),is_array($content)?$content:array($content));
+			} else {
+				$old = is_array(self::$original[$type]) ? self::$original[$type] : array(self::$original[$type]);
+				$new = is_array($content) ? $content : array($content);
+				self::$original[$type] =  array_merge($old,$new);
+			}
 
-			$json ? $this->setJson(self::$original) : $this->setData(self::$original);
+			$this->setData(self::$original); //@TODO fix json content
 
 			return $this;
 		}
@@ -106,9 +109,8 @@
 		 * @param $data
 		 * @return $this
 		 */
-		public function withData($data): BaseHttpResponse
-		{
-			$this->withContent('data',$data);
+		public function withData($data): BaseHttpResponse {
+			$this->withContent('data', $data);
 			return $this;
 		}
 
@@ -126,8 +128,7 @@
 		 * @param bool $hateoas
 		 * @return $this
 		 */
-		public function withLinks(array $links, bool $hateoas = true): BaseHttpResponse
-		{
+		public function withLinks(array $links, bool $hateoas = true): BaseHttpResponse {
 			foreach ($links as $link)
 				$this->withLink($link, $hateoas);
 
@@ -141,8 +142,7 @@
 		 * @param bool $hateoas
 		 * @return $this
 		 */
-		public function withLink(array $link, bool $hateoas = true): BaseHttpResponse
-		{
+		public function withLink(array $link, bool $hateoas = true): BaseHttpResponse {
 			if ($hateoas) {
 				list($processed['rel'], $processed['href'], $processed['method']) = array_pad(array_values($link),3,'');
 				$link = $processed;
@@ -172,8 +172,7 @@
 		/**
 		 * @return mixed
 		 */
-		public function getData(bool $json = false, string ...$_fields)
-		{
+		public function getData(bool $json = false, string ...$_fields) {
 			if (!empty($_fields))
 				return $this->search($this->data,true, $_fields);
 
@@ -190,13 +189,13 @@
 		 *
 		 * @return mixed|string
 		 */
-		public function getContent(bool $json = false, string ...$_fields)
-		{
+		public function getContent(bool $json = false, string ...$_fields) {
 			if (!empty($_fields))
 				return $this->search($this->content,true, $_fields);
 
 			if($json)
 				return json_decode($this->content,true);
+
 			return $this->content;
 		}
 

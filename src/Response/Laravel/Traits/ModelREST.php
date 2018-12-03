@@ -55,9 +55,9 @@
 		 *
 		 * @return string
 		 */
-		public function getBasicPath(): string
+		public function getBasicUri(): string
 		{
-			return $this->basic_path;
+			return $this->basic_uri;
 		}
 
 		/**
