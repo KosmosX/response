@@ -8,24 +8,29 @@
 
 	namespace ResponseHTTP\Response;
 
-	use ResponseHTTP\Response\Traits\ConditionalHeaders;
 	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 
 	class BaseHttpResponse extends BaseJsonResponse
 	{
+		protected $original = array();
+		protected $property;
 
-		protected static $original = [];
+		/**
+		 * @param string|NULL $type
+		 * @param null        $data
+		 * @param int         $status
+		 * @param array       $headers
+		 * @param bool        $json
+		 */
+		protected function __preCostructor(string $type = NULL, $data = NULL, int $status = 200, array $headers = array(), bool $json = false)
+		{
+			$this->property = json_encode(array('init' => ['type' => $type,'status' => (string)$status, 'headers' => $headers?true:false, 'json' => $json]));
 
-		protected function dispatcher(string $type, ...$construct) {
-			list($content,$status,$headers, $json) = $construct;
-			unset($construct);
+			if (NULL === $data)
+				$data = array_key_exists($status, self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
 
 			self::__construct('',$status,$headers,$json);
-
-			if (null === $content)
-				$content = array_key_exists((string)$status,self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
-
-			$this->withContent($type, $content,false, $json);
+			$this->withContent($type, $data, false, $json);
 		}
 
 		/**
@@ -61,7 +66,6 @@
 			return $this;
 		}
 
-
 		/**
 		 * Add element to content response
 		 *
@@ -72,16 +76,19 @@
 		 *
 		 * @return \ResponseHTTP\Response\BaseHttpResponse
 		 */
-		public function withContent(string $type = 'content', $content = array(), bool $override = false, bool $json = false) :BaseHttpResponse{
-			if (!array_key_exists($type,self::$original) || $override) {
-				self::$original[$type] = $content;
+		public function withContent(string $type = null, $content = array(), bool $override = false, bool $json = false) :BaseHttpResponse{
+			if ($json)
+				$content = json_decode($content,true);
+
+			if (!array_key_exists($type,$this->original) || $override) {
+				$this->original[$type] = $content;
 			} else {
-				$old = is_array(self::$original[$type]) ? self::$original[$type] : array(self::$original[$type]);
+				$old = is_array($this->original[$type]) ? $this->original[$type] : array($this->original[$type]);
 				$new = is_array($content) ? $content : array($content);
-				self::$original[$type] =  array_merge($old,$new);
+				$this->original[$type] =  array_merge($old,$new);
 			}
 
-			$this->setData(self::$original); //@TODO fix json content
+			$this->setData($this->original);
 
 			return $this;
 		}
@@ -149,71 +156,93 @@
 				unset($processed);
 			}
 
-			if(!array_key_exists('links',self::$original))
-				self::$original['links'] = array($link);
+			if(!array_key_exists('links',$this->original))
+				$this->original['links'] = array($link);
 			else
-				self::$original['links'] = array_merge(self::$original['links'],array($link));
+				$this->original['links'] = array_merge($this->original['links'],array($link));
 
 			return $this;
 		}
 
 		/**
+		 * Ger property
+		 * Can get only element with key / keys
+		 *
+		 * @param mixed ...$fields
+		 *
+		 * @return array
+		 */
+		public function getProperty(string ...$_fields) :array {
+			$property = json_decode($this->property,true);
+
+			if (!empty($_fields))
+				return $this->find($property, $_fields);
+
+			return $property;
+		}
+
+		/**
+		 * Ger original
+		 * Can get only element with key / keys
+		 *
 		 * @param mixed ...$fields
 		 *
 		 * @return array
 		 */
 		public function getOriginal(string ...$_fields) :array {
 			if (!empty($_fields))
-				return $this->search(self::$original,false, $_fields);
+				return $this->find($this->original, $_fields);
 
-			return array_filter(self::$original);
+			return array_filter($this->original);
 		}
 
 		/**
-		 * @return mixed
+		 * Ger data json_encode
+		 * or can get only element with key / keys
+		 *
+		 * @param string ...$_fields
+		 *
+		 * @return array|mixed
 		 */
-		public function getData(bool $json = false, string ...$_fields) {
+		public function getData(string ...$_fields) {
+			$data = json_decode($this->data,true);
 			if (!empty($_fields))
-				return $this->search($this->data,true, $_fields);
+				return $this->find($data, $_fields);
 
-			if($json)
-				return json_decode($this->data,true);
-
-			return $this->data;
+			return $data;
 		}
 
 		/**
-		 * Override getContent method
+		 * Ger content json_encode
+		 * or can get only element with key / keys
 		 *
 		 * @param bool $parent
 		 *
 		 * @return mixed|string
 		 */
-		public function getContent(bool $json = false, string ...$_fields) {
+		public function getContent(string ...$_fields) {
+			$content = json_decode($this->content,true);
+
 			if (!empty($_fields))
-				return $this->search($this->content,true, $_fields);
+				return $this->find($content, $_fields);
 
-			if($json)
-				return json_decode($this->content,true);
-
-			return $this->content;
+			return $content;
 		}
 
 		/**
+		 * Find keys in array data and return only element found
+		 *
 		 * @param array  $data
 		 * @param bool   $json
 		 * @param string ...$_gets
 		 *
 		 * @return array
 		 */
-		protected function search($data = array(), bool $json = false, ...$_gets):array {
-			if($json)
-				$data = json_decode($data,true);
-
+		protected function find($data = array(), ...$_gets):array {
 			$found = array();
-			foreach ($_gets as $str) {
+			foreach ($_gets as $str)
 				array_key_exists($str[0], $data) ? $found[$str[0]] = $data[$str[0]] : NULL;
-			}
+
 			return $found;
 		}
 	}

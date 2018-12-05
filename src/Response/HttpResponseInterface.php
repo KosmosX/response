@@ -77,7 +77,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function data($content = NULL, $status = 200, array $headers = array(), $options = false);
+		public function successData($content = NULL, $status = 200, array $headers = array(), $options = false);
 
 		/**
 		 * Alias for not modified Response

@@ -15,35 +15,30 @@
 	{
 		use ConditionalHeaders;
 
-		public function data($content = NULL, $status = 200, array $headers = array(), $json = false) {
-			$this->dispatcher('data', $content, $status, $headers, $json);
+		public function success($content = null, int $status = 200, array $headers = array(), $json = false) {
+			self::__preCostructor('success', $content, $status, $headers, $json);
 			return $this;
 		}
 
-		public function notModified(array $headers = array(), $json = false) {
-			parent::__construct('', 304, $headers, $json);
+		public function successCreated($content = null, int $status = 201, array $headers = array(), $json = false) {
+			return $this->success($content, $status, $headers, $json);
+		}
+
+		public function successAccepted($content = null, int $status = 202, array $headers = array(), $json = false) {
+			return $this->success($content, $status, $headers, $json);
+		}
+
+		public function successNoContent($content = null, int $status = 204, array $headers = array(), $json = false) {
+			return $this->success($content, $status, $headers, $json);
+		}
+
+		public function successData($content = NULL, int $status = 200, array $headers = array(), $json = false) {
+			self::__preCostructor('data', $content, $status, $headers, $json);
 			return $this;
-		}
-
-		public function success($content = null, $status = 200, array $headers = array(), $json = false) {
-			$this->dispatcher('success', $content, $status, $headers, $json);
-			return $this;
-		}
-
-		public function successCreated($content = null, $status = 201, array $headers = array(), $json = false) {
-			return $this->success($content, $status, $headers, $json);
-		}
-
-		public function successAccepted($content = null, $status = 202, array $headers = array(), $json = false) {
-			return $this->success($content, $status, $headers, $json);
-		}
-
-		public function successNoContent($content = null, $status = 204, array $headers = array(), $json = false) {
-			return $this->success($content, $status, $headers, $json);
 		}
 
 		public function error($content = null, int $status = 400, array $headers = array(), $json = false) {
-			$this->dispatcher('error', $content, $status, $headers, $json);
+			self::__preCostructor('error', $content, $status, $headers, $json);
 			return $this;
 		}
 
@@ -91,7 +86,12 @@
 			return $this->error($content, $status, $headers, $json);
 		}
 
-		public static function errorException($content, $status = 400, array $headers = array(), $code = 0) {
+		public static function errorException($content, int $status = 400, array $headers = array(), $code = 0) {
 			throw new HttpException($status, $content, null, $headers, $code);
+		}
+
+		public function notModified(array $headers = array(), $json = false) {
+			self::__preCostructor(null, array(), 304, $headers, $json);
+			return $this;
 		}
 	}
