@@ -34,15 +34,15 @@
 		 */
 		public function handle(\Exception $e)
 		{
-			$status = 400;
-			$headers = [];
 			$env = (getenv('RESPONSE_DEBUG') === "true" ? true : false);
-			$content = [
+			$status = 400;
+			$headers = array();
+			$content = array(
 				'error' => [
 					'message' => $e->getMessage(),
 					'code' => $e->getCode(),
-				],
-			];
+				]
+			);
 
 			if ($e instanceof \HttpException) {
 				$status = $e->getStatusCode();

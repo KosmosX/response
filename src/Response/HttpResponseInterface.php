@@ -29,7 +29,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function success($content = NULL, $status = 200, array $headers = array(), $options = false);
+		public function success($content = NULL, int $status = 200, array $headers = array(), $options = false);
 
 		/**
 		 * Alias success for Resource created
@@ -41,7 +41,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function successCreated($content = NULL, $status = 201, array $headers = array(), $options = false);
+		public function successCreated($content = NULL, int $status = 201, array $headers = array(), $options = false);
 
 		/**
 		 * Alias success for Request Accepted
@@ -53,7 +53,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function successAccepted($content = NULL, $status = 202, array $headers = array(), $options = false);
+		public function successAccepted($content = NULL, int $status = 202, array $headers = array(), $options = false);
 
 		/**
 		 * Alias success for No content response
@@ -65,7 +65,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function successNoContent($content = NULL, $status = 204, array $headers = array(), $options = false);
+		public function successNoContent($content = NULL, int $status = 204, array $headers = array(), $options = false);
 
 		/**
 		 * Method for data responses
@@ -77,7 +77,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function successData($content = NULL, $status = 200, array $headers = array(), $options = false);
+		public function successData($content = NULL, int $status = 200, array $headers = array(), $options = false);
 
 		/**
 		 * Alias for not modified Response
@@ -251,5 +251,5 @@
 		 * @param array $headers
 		 * @param int   $code
 		 */
-		public static function errorException($content, $status = 400, array $headers = array(), $code = 0);
+		public static function errorException($content, int $status = 400, array $headers = array(), $code = 0);
 	}
