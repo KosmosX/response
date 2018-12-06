@@ -2,12 +2,7 @@
 
 	namespace ResponseHTTP\Response\Traits;
 
-	use Carbon\Carbon;
-	use Illuminate\Http\JsonResponse;
-	use Illuminate\Http\Request;
-	use Illuminate\Http\Response;
 	use Symfony\Component\HttpFoundation\Response as BaseResponse;
-	use Illuminate\Support\Facades\Crypt;
 
 	trait ConditionalHeaders
 	{
@@ -17,7 +12,7 @@
 		 * @param $response
 		 * @return string
 		 */
-		public function getEtagss(): array
+		public function getEtags(): array
 		{
 			return $this->explodeEtag($this->headers->get('ETag'));
 		}
@@ -28,10 +23,10 @@
 		 * @param $response
 		 * @return array
 		 */
-		public function getPlayloadEtag(): array
+		public function getEtagPlayload(): array
 		{
 			$playloads = [];
-			$etag = $this->getEtagss();
+			$etag = $this->getEtags();
 			foreach ($etag as $item) {
 				list($code, $key, $timestamp) = explode('.', base64_decode($item));
 				$playload = [
@@ -58,8 +53,7 @@
 		 * @param string $code
 		 * @return $this|object
 		 */
-		public function setEtagPlayload(string $key = '', string $code = '0x', bool $weak = false): object
-		{
+		public function setEtagPlayload(string $key = '', string $code = '0x', bool $weak = false) {
 			$key = $key ?: str_random(10);
 			$etag = base64_encode($code . '.' . $key . '.' . date("Y-m-d H:i:s"));
 			return $this->setEtag($etag,$weak);
@@ -72,16 +66,15 @@
 		 * @param $response
 		 * @return bool
 		 */
-		public function ifNoneMatch(Request $request, BaseResponse $response): object
-		{
-			$resposeEtag = $this->getEtags($response);
-			$requestEtags = $request->header('If-None-Match');
+		public function ifNoneMatch($request) {
+			$resposeEtags = $this->getEtags();
+			$requestEtag = $request->headers->get('If-None-Match');
 
-			foreach ($requestEtags as $requestEtag)
-				if (in_array($requestEtag,$resposeEtag))
-					return $this->notModified();
+			foreach ($resposeEtags as $resposeEtag)
+				if ($resposeEtag === $requestEtag)
+					return $this->reset()->notModified();
 
-			return $response;
+			return $this;
 		}
 
 		/**
@@ -91,21 +84,15 @@
 		 * @param $response
 		 * @return bool
 		 */
-		public function ifMatch(Request $request, BaseResponse $response): object
-		{
-			$responseEtags = $this->getEtags($response);
-			$requestEtags = $this->explodeEtag($request->header('If-Match'));
+		public function ifMatch($request) {
+			$responseEtags = $this->getEtags();
+			$requestEtag = $request->headers->get('If-Match');
 
-			foreach ($requestEtags as $requestEtag) {
-				if (!in_array($requestEtag,$responseEtags)) {
-					if ($request->method() == 'GET')
-						return $this->forced()->errorRangeNotSatisfiable();
-					else
-						return $this->forced()->errorPreconditionFailed();
-				}
-			}
+			foreach ($resposeEtags as $resposeEtag)
+				if ($resposeEtag === $requestEtag)
+					return $this->reset()->errorPreconditionFailed();
 
-			return $response;
+			return $this;
 		}
 
 		/**
@@ -116,16 +103,13 @@
 		 *
 		 * @return mixed
 		 */
-		public function ifModifiedSince(Request $request, $response) {
-			$responseSince = $this->instaceOf($response) ? $this->getLastModified($response) : $response;
-			$requestSince = $request->header('If-Modified-Since');
+		public function ifModifiedSince($request) {
+			$requestSince = $request->headers->get('If-Modified-Since');
 
-			if($this->instaceOf($response) && $this->getLastModified($response) > $requestSince)
-				return $response;
-			elseif ($response > $requestSince)
-				return $this->forced()->success('true',200);
+			if($this->getLastModified() > $requestSince)
+				return $this;
 			else
-				return $this->notModified();
+				return $this->reset()->notModified();
 
 		}
 
@@ -137,20 +121,13 @@
 		 *
 		 * @return mixed
 		 */
-		public function ifUnmodifiedSince(Request $request, $response) {
-			$responseSince = $this->instaceOf($response) ? $this->getLastModified($response) : $response;
-			$requestSince = $request->header('If-Unmodified-Since');
+		public function ifUnmodifiedSince($request) {
+			$requestSince = $request->headers->get('If-Unmodified-Since');
 
-			if($this->instaceOf($response) && $this->getLastModified($response) < $requestSince)
-				return $response;
-			elseif ($response < $requestSince)
-				return $this->forced()->success('true',200);
+			if($this->getLastModified() < $requestSince)
+				return $this;
 			else
-				return $this->forced()->errorPreconditionFailed();
-		}
-
-		private function instaceOf($response) :bool {
-			return $response instanceof BaseResponse ? true : false;
+				return $this->reset()->errorPreconditionFailed();
 		}
 
 		private function explodeEtag(string $etags){

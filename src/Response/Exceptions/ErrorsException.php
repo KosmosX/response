@@ -23,4 +23,6 @@
 		public static function exception ($content, $status = 400, array $headers = [], $code = 0) {
 			return HttpResponse::errorException($content, $status, $headers, $code);
 		}
+
+		//@TODO fix class
 	}

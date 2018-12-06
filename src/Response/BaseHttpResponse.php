@@ -245,4 +245,9 @@
 
 			return $found;
 		}
+
+		protected function reset() {
+			$this->original = array();
+			return $this;
+		}
 	}
