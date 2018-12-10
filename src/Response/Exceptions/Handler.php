@@ -9,6 +9,7 @@
 	namespace ResponseHTTP\Response\Exceptions;
 
 	use ResponseHTTP\Response\HttpResponse;
+	use Symfony\Component\HttpKernel\Exception\HttpException;
 
 	class Handler
 	{
@@ -34,17 +35,17 @@
 		 */
 		public function handle(\Exception $e)
 		{
-			$env = (getenv('RESPONSE_DEBUG') === "true" ? true : false);
 			$status = 400;
 			$headers = array();
-			$content = array(
+			$env = ("true" === getenv('RESPONSE_DEBUG') ? true : false);
+			$content = [
 				'error' => [
 					'message' => $e->getMessage(),
 					'code' => $e->getCode(),
-				]
-			);
+				],
+			];
 
-			if ($e instanceof \HttpException) {
+			if ($e instanceof HttpException) {
 				$status = $e->getStatusCode();
 				$headers = $e->getHeaders();
 				$content['error'] = array_add($content['error'], 'status_code', $status);
