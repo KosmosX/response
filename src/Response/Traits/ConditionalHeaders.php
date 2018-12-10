@@ -60,6 +60,30 @@
 		}
 
 		/**
+		 * Sets multi ETag values.
+		 *
+		 * example:
+		 * ->setEtags(array("etag1","etag2","etagN");
+		 *
+		 * @param array $etags
+		 * @param bool  $weak
+		 *
+		 * @return $this
+		 */
+		public function setEtags(array $etags = array(), bool $weak = false) {
+			$newEtag = $this->getEtag()? $this->getEtag() . "," :'';
+
+			foreach ($etags as $etag) {
+				if (is_string($etag))
+					$newEtag .= (true === $weak ? 'W/' : '') . " \"" . $etag . "\", ";
+			}
+
+			$this->headers->set('ETag', $newEtag);
+
+			return $this;
+		}
+
+		/**
 		 * Method to check If-None-Match
 		 *
 		 * @param Request $request
@@ -88,7 +112,7 @@
 			$responseEtags = $this->getEtags();
 			$requestEtag = $request->headers->get('If-Match');
 
-			foreach ($resposeEtags as $resposeEtag)
+			foreach ($responseEtags as $resposeEtag)
 				if ($resposeEtag === $requestEtag)
 					return $this->reset()->errorPreconditionFailed();
 
