@@ -31,8 +31,7 @@
 
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev",
-            "dev-beta": "beta-dev"
+            "dev-master": "1.0.x-rc"
         }
     }
 }
