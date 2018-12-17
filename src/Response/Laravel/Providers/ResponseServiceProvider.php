@@ -10,7 +10,7 @@
 
 	use Illuminate\Support\ServiceProvider;
 
-	class HttpServiceProvider extends ServiceProvider
+	class ResponseServiceProvider extends ServiceProvider
 	{
 		/**
 		 * Register any application services.
@@ -28,7 +28,7 @@
 		 */
 		protected function registerAlias()
 		{
-			class_alias(\ResponseHTTP\Response\Laravel\Facades\ResponseFacade::class, 'HttpResponse');
+			class_alias(\ResponseHTTP\Response\Laravel\Facades\ResponseFacade::class, 'ServiceResponse');
 		}
 
 		/**

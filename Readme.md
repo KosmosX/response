@@ -1,7 +1,5 @@
-### Version
-**stable**: v1.0.0-rc
-
 ### Documentation 
+![](https://img.shields.io/badge/version-1.0.0--rc-green.svg) 
 
 **en**: [documentation](https://github.com/FabrizioCafolla/response-http/wiki/Response-http-documentation)
 
