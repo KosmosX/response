@@ -67,12 +67,34 @@
 		 *
 		 * @return string
 		 */
-		public function setBasicUri(string $uri = null): void
+		public function setBasicUri(string $uri = NULL): void
 		{
-			if (null === $uri)
+			if (NULL === $uri)
 				$this->basic_uri = 'api/';
 			else
 				$this->basic_uri = strtolower($uri);
+		}
+
+		/**
+		 * Get links of Model
+		 * to recover only some links you have to pass as string parameters that contain the rel of the link that you
+		 * want to take.
+		 *
+		 * @param string ...$_rel
+		 *
+		 * @return array
+		 */
+		public function getLinks(string ...$rels): array
+		{
+			if (array() === $rels)
+				return $this->links;
+
+			$links = array();
+			foreach ($this->links as $link) {
+				foreach ($rels as $rel)
+					in_array($rel, $link) ? array_push($links, $link) : NULL;
+			}
+			return $links;
 		}
 
 		/**
@@ -87,11 +109,9 @@
 		public function setLinks(...$_): void
 		{
 			//check if links array will be override by new element
-			if (is_bool(end($_))) {
-				$override = end($_);
-				if (true === $override)
-					$this->links = array();
-				array_splice($_, count($_)-1);
+			if (is_bool(end($_)) && true === end($_)) {
+				$this->links = array();
+				array_splice($_, count($_) - 1);
 			}
 
 			foreach ($_ as $key => $link)
@@ -103,36 +123,15 @@
 		 *
 		 * @param $_link
 		 */
-		private function addLink($_link): void
+		private function addLink($link): void
 		{
-			if (!is_array($_link))
-				$_link = array();
+			if (!is_array($link))
+				$link = array();
 			else
-				$_link = array_pad($_link,3,'');
+				$link = array_pad($link, 3, '');
 
-			$link = array_combine(array('rel','href','method'),$_link);
-			array_push($this->links,$link);
-		}
-
-		/**
-		 * Get links of Model
-		 * to recover only some links you have to pass as string parameters that contain the rel of the link that you want to take.
-		 *
-		 * @param string ...$_rel
-		 *
-		 * @return array
-		 */
-		public function getLinks(string ...$_rel): array
-		{
-			if (null == $_rel)
-				return $this->links;
-
-			$links = array();
-			foreach ($this->links as $link) {
-				foreach ($_rel as $str)
-					in_array($str,$link) ? array_push($links, $link) :null;
-			}
-			return $links;
+			$link = array_combine(array('rel', 'href', 'method'), $link);
+			array_push($this->links, $link);
 		}
 
 		/**
