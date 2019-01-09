@@ -9,6 +9,7 @@
 	namespace ResponseHTTP\Response;
 
 	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
+	use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 	class BaseHttpResponse extends BaseJsonResponse
 	{
@@ -22,7 +23,7 @@
 		 * @param array       $headers
 		 * @param bool        $json
 		 */
-		protected function __preCostructor(string $type = NULL, $data = NULL, int $status = 200, array $headers = array(), bool $json = false)
+		public function __costructor(string $type = NULL, $data = NULL, int $status = 200, array $headers = array(), bool $json = false)
 		{
 			$metadata = array('init' => ['type' => $type, 'status' => (string)$status, 'headers' => $headers ? true : false, 'json' => $json]);
 			$this->setMetadata($metadata);
@@ -31,7 +32,9 @@
 			if (NULL === $data)
 				$data = array_key_exists($status, self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
 
-			self::__construct('', $status, $headers, $json);
+			$this->headers = new ResponseHeaderBag($headers);
+			$this->setStatusCode($status);
+			$this->setProtocolVersion('1.0');
 			$this->withContent($type, $data, false, $json);
 		}
 
@@ -85,15 +88,17 @@
 			if ($json)
 				$content = json_decode($content, true);
 
-			if (!array_key_exists($type, $this->original) || $override) {
-				$this->original[$type] = $content;
+			$data = $this->getData();
+
+			if (!array_key_exists($type, $data) || $override) {
+				$data[$type] = $content;
 			} else {
-				$old = is_array($this->original[$type]) ? $this->original[$type] : array($this->original[$type]);
+				$exist = is_array($data[$type]) ? $data[$type] : array($data[$type]);
 				$new = is_array($content) ? $content : array($content);
-				$this->original[$type] = array_merge($old, $new);
+				$data[$type] = array_merge($exist, $new);
 			}
 
-			$this->setData($this->original);
+			$this->setData($data);
 
 			return $this;
 		}
@@ -194,10 +199,7 @@
 				unset($processed);
 			}
 
-			if (!array_key_exists('links', $this->original))
-				$this->original['links'] = array($link);
-			else
-				$this->original['links'] = array_merge($this->original['links'], array($link));
+			$this->withContent('links', $link, false);
 
 			return $this;
 		}
@@ -207,7 +209,7 @@
 		 *
 		 * @param array $values
 		 */
-		public function setMetadata(array $values)
+		public function setMetadata(array $values) :void
 		{
 			$metadata = json_decode($this->metadata, true);
 
@@ -236,22 +238,6 @@
 		}
 
 		/**
-		 * Ger original
-		 * Can get only element with key / keys
-		 *
-		 * @param mixed ...$fields
-		 *
-		 * @return array
-		 */
-		public function getOriginal(string ...$_fields): array
-		{
-			if (!empty($_fields))
-				return $this->find($this->original, $_fields);
-
-			return array_filter($this->original);
-		}
-
-		/**
 		 * Ger data json_encode
 		 * or can get only element with key / keys
 		 *
@@ -259,13 +245,13 @@
 		 *
 		 * @return array|mixed
 		 */
-		public function getData(string ...$_fields)
+		public function getData(string ...$_fields) :array
 		{
 			$data = json_decode($this->data, true);
 			if (!empty($_fields))
 				return $this->find($data, $_fields);
 
-			return $data;
+			return $data ? : array();
 		}
 
 		/**
@@ -276,14 +262,14 @@
 		 *
 		 * @return mixed|string
 		 */
-		public function getContent(string ...$_fields)
+		public function getContent(string ...$_fields) :array
 		{
 			$content = json_decode($this->content, true);
 
 			if (!empty($_fields))
 				return $this->find($content, $_fields);
 
-			return $content;
+			return $content ? : array();
 		}
 
 		/**
@@ -309,9 +295,9 @@
 		 *
 		 * @return $this
 		 */
-		protected function reset()
+		public function reset(): BaseHttpResponse
 		{
-			$this->original = array();
+			$this->setJson("");
 			return $this;
 		}
 	}

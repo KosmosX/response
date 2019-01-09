@@ -16,7 +16,7 @@
 		use ConditionalHeaders;
 
 		public function success($content = null, int $status = 200, array $headers = array(), $json = false) {
-			self::__preCostructor('success', $content, $status, $headers, $json);
+			self::__costructor('success', $content, $status, $headers, $json);
 			return $this;
 		}
 
@@ -33,12 +33,12 @@
 		}
 
 		public function successData($content = NULL, int $status = 200, array $headers = array(), $json = false) {
-			self::__preCostructor('data', $content, $status, $headers, $json);
+			self::__costructor('data', $content, $status, $headers, $json);
 			return $this;
 		}
 
 		public function error($content = null, int $status = 400, array $headers = array(), $json = false) {
-			self::__preCostructor('error', $content, $status, $headers, $json);
+			self::__costructor('error', $content, $status, $headers, $json);
 			return $this;
 		}
 
@@ -91,7 +91,7 @@
 		}
 
 		public function notModified(array $headers = array(), $json = false) {
-			self::__preCostructor(null, array(), 304, $headers, $json);
+			self::__costructor(null, array(), 304, $headers, $json);
 			return $this;
 		}
 	}

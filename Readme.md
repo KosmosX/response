@@ -1,16 +1,26 @@
 # Documentation 
-![](https://img.shields.io/badge/version-1.0.0--rc-green.svg) 
+![](https://img.shields.io/badge/version-1.0.1--rc-green.svg) 
 
 **en**: [documentation](https://github.com/FabrizioCafolla/response-http/wiki/Response-http-documentation)
 
 **it**: [documentazione](https://github.com/FabrizioCafolla/response-http/wiki/Documentazione-response-http)
 
+#### Compatibility 
+
+with PHP >=7.1
+
+with Laravel or Lumen >=5.6
+ 
+with Symfony >=4.2 
+
 #### Let's go
     
     composer require fabrizio-cafolla/response-http
     
-    //Laravel or Lumen
-    ResponseServiceProvider (register in app)
+    //Laravel or Lumen register providers
+    ResponseServiceProvider
+    use ResponseHTTP\Response\HttpResponse;
+    use ServiceResponse; (Facade alias)
     
     //Register handler Execptions (LaravelHandler or LumenHandler)
     $this->app->singleton(
@@ -18,10 +28,12 @@
         \ResponseHTTP\Response\Laravel\Exceptions\.....::class
     );
     
-    //Use it
-    use ResponseHTTP\Response\HttpResponse;
-    use HttpResponse; (Facade alias)
-    
+    //PHP 7.1
+    require __DIR__ . '/vendor/autoload.php';
+    $response = new ResponseHTTP\Response\HttpResponse();
+
+    $handler = ResponseHTTP\Response\Exceptions\Handler();
+    $handler->setExceptionHandler();    
 ***
 
 If you find a bug or want to contribute, write to developer@fabriziocafolla.com
