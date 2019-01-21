@@ -2,8 +2,6 @@
 
 	namespace ResponseHTTP\Response\Traits;
 
-	use Symfony\Component\HttpFoundation\Response as BaseResponse;
-
 	trait ConditionalHeaders
 	{
 		/**

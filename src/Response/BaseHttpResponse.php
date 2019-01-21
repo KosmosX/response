@@ -13,8 +13,7 @@
 
 	class BaseHttpResponse extends BaseJsonResponse
 	{
-		protected $original = array();
-		protected $metadata = NULL;
+		protected $metadata = null;
 
 		/**
 		 * @param string|NULL $type
@@ -23,19 +22,143 @@
 		 * @param array       $headers
 		 * @param bool        $json
 		 */
-		public function __costructor(string $type = NULL, $data = NULL, int $status = 200, array $headers = array(), bool $json = false)
+		public function __costructor(?string $type, $data = null, int $status = 200, array $headers = array(), bool $json = false)
 		{
-			$metadata = array('init' => ['type' => $type, 'status' => (string)$status, 'headers' => $headers ? true : false, 'json' => $json]);
-			$this->setMetadata($metadata);
-			unset($metadata);
+			$this->init($type, $status, $headers, $json);
 
-			if (NULL === $data)
+			if (null === $data)
 				$data = array_key_exists($status, self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
 
+			$this->withContent($type, $data, false, $json);
+		}
+
+		/**
+		 * Init response
+		 *
+		 * @param null  $type
+		 * @param int   $status
+		 * @param array $headers
+		 * @param bool  $json
+		 */
+		private function init($type = null, $status = 200, $headers = array(), $json = false)
+		{
 			$this->headers = new ResponseHeaderBag($headers);
 			$this->setStatusCode($status);
 			$this->setProtocolVersion('1.0');
-			$this->withContent($type, $data, false, $json);
+
+			$metadata = array('init' => [
+				'type' => $type,
+				'status' => (string)$status,
+				'headers' => $headers ? true : false,
+				'json' => $json,
+			]);
+			$this->setMetadata($metadata);
+		}
+
+		/**
+		 * Add element to content response
+		 *
+		 * @param string $type
+		 * @param array  $content
+		 * @param bool   $override
+		 * @param bool   $json
+		 *
+		 * @return \ResponseHTTP\Response\BaseHttpResponse
+		 */
+		public function withContent(?string $type, $content = array(), bool $override = false, bool $json = false): BaseHttpResponse
+		{
+			if ($json)
+				$content = json_decode($content, true);
+
+			$data = $this->getData();
+
+			if (null == $type)
+				$data[] = $content;
+			else
+				if (null === ($exist = $this->getArrayByPath($data, $type)) || $override) {
+					$this->assignArrayByPath($data, $type, $content);
+				} else {
+					if (false === is_array($exist)) $exist = (array)$exist;
+					if (false === is_array($content)) $content = (array)$content;
+					$this->assignArrayByPath($data, $type, array_merge($exist, $content));
+				}
+
+			$this->setData($data);
+			return $this;
+		}
+
+		/**
+		 * Ger data json_encode
+		 * or can get only element with key / keys
+		 *
+		 * @param string ...$_fields
+		 *
+		 * @return array|mixed
+		 */
+		public function getData(string ...$_fields): array
+		{
+			$data = json_decode($this->data, true);
+			if (!empty($_fields))
+				return $this->find($data, $_fields);
+
+			return $data ?: array();
+		}
+
+		/**
+		 * Find keys in array data and return only element found
+		 *
+		 * @param array  $data
+		 * @param bool   $json
+		 * @param string ...$_gets
+		 *
+		 * @return array
+		 */
+		protected function find($data = array(), ...$_gets): array
+		{
+			$found = array();
+			foreach ($_gets as $str)
+				array_key_exists($str[0], $data) ? $found[$str[0]] = $data[$str[0]] : null;
+
+			return $found;
+		}
+
+		/**
+		 * Get element of array with dot notation
+		 *
+		 * @param array  $data
+		 * @param string $needle
+		 * @param string $separator
+		 *
+		 * @return array|mixed
+		 */
+		private function getArrayByPath(array $data, string $needle, string $separator = '.')
+		{
+			$keys = explode($separator, $needle);
+
+			foreach ($keys as $key)
+				$data = &$data[$key];
+
+			//return last element
+			return $data ?: null;
+		}
+
+		/**
+		 * Assign to element value with dot notation
+		 *
+		 * @param array  $data
+		 * @param string $needle
+		 * @param        $value
+		 * @param string $separator
+		 */
+		private function assignArrayByPath(array &$data, string $needle, $value, string $separator = '.')
+		{
+			$keys = explode($separator, $needle);
+
+			foreach ($keys as $key)
+				$data = &$data[$key];
+
+			//assign value to last element
+			$data = $value;
 		}
 
 		/**
@@ -69,36 +192,6 @@
 			foreach ($headers as $key => $value) {
 				$this->headers->set($key, $value);
 			}
-
-			return $this;
-		}
-
-		/**
-		 * Add element to content response
-		 *
-		 * @param string $type
-		 * @param array  $content
-		 * @param bool   $override
-		 * @param bool   $json
-		 *
-		 * @return \ResponseHTTP\Response\BaseHttpResponse
-		 */
-		public function withContent(string $type = NULL, $content = array(), bool $override = false, bool $json = false): BaseHttpResponse
-		{
-			if ($json)
-				$content = json_decode($content, true);
-
-			$data = $this->getData();
-
-			if (!array_key_exists($type, $data) || $override) {
-				$data[$type] = $content;
-			} else {
-				$exist = is_array($data[$type]) ? $data[$type] : array($data[$type]);
-				$new = is_array($content) ? $content : array($content);
-				$data[$type] = array_merge($exist, $new);
-			}
-
-			$this->setData($data);
 
 			return $this;
 		}
@@ -142,7 +235,8 @@
 		 *
 		 * @return \ResponseHTTP\Response\BaseHttpResponse
 		 */
-		public function withMessage(string $message, bool $override = false): BaseHttpResponse {
+		public function withMessage(string $message, bool $override = false): BaseHttpResponse
+		{
 			$this->withContent('message', $message, $override);
 			return $this;
 		}
@@ -151,12 +245,27 @@
 		 * Alias to add Included to content
 		 *
 		 * @param array $message
-		 * @param bool   $override
+		 * @param bool  $override
 		 *
 		 * @return \ResponseHTTP\Response\BaseHttpResponse
 		 */
-		public function withIncluded(array $included, bool $override = false): BaseHttpResponse {
+		public function withIncluded(array $included, bool $override = false): BaseHttpResponse
+		{
 			$this->withContent('included', $included, $override);
+			return $this;
+		}
+
+		/**
+		 * Alias to add Validation errors to content
+		 *
+		 * @param array $message
+		 * @param bool  $override
+		 *
+		 * @return \ResponseHTTP\Response\BaseHttpResponse
+		 */
+		public function withValidation(array $validation, bool $override = false): BaseHttpResponse
+		{
+			$this->withContent('validationErrors', $validation, $override);
 			return $this;
 		}
 
@@ -205,21 +314,6 @@
 		}
 
 		/**
-		 * Set metadata of response
-		 *
-		 * @param array $values
-		 */
-		public function setMetadata(array $values) :void
-		{
-			$metadata = json_decode($this->metadata, true);
-
-			foreach ($values as $key => $value)
-				$metadata[$key] = $value;
-
-			$this->metadata = json_encode($metadata, JSON_FORCE_OBJECT);
-		}
-
-		/**
 		 * Ger metadata
 		 * Can get only element with key / keys
 		 *
@@ -238,20 +332,18 @@
 		}
 
 		/**
-		 * Ger data json_encode
-		 * or can get only element with key / keys
+		 * Set metadata of response
 		 *
-		 * @param string ...$_fields
-		 *
-		 * @return array|mixed
+		 * @param array $values
 		 */
-		public function getData(string ...$_fields) :array
+		public function setMetadata(array $values): void
 		{
-			$data = json_decode($this->data, true);
-			if (!empty($_fields))
-				return $this->find($data, $_fields);
+			$metadata = json_decode($this->metadata, true);
 
-			return $data ? : array();
+			foreach ($values as $key => $value)
+				$metadata[$key] = $value;
+
+			$this->metadata = json_encode($metadata, JSON_FORCE_OBJECT);
 		}
 
 		/**
@@ -262,32 +354,14 @@
 		 *
 		 * @return mixed|string
 		 */
-		public function getContent(string ...$_fields) :array
+		public function getContent(string ...$_fields): array
 		{
 			$content = json_decode($this->content, true);
 
 			if (!empty($_fields))
 				return $this->find($content, $_fields);
 
-			return $content ? : array();
-		}
-
-		/**
-		 * Find keys in array data and return only element found
-		 *
-		 * @param array  $data
-		 * @param bool   $json
-		 * @param string ...$_gets
-		 *
-		 * @return array
-		 */
-		protected function find($data = array(), ...$_gets): array
-		{
-			$found = array();
-			foreach ($_gets as $str)
-				array_key_exists($str[0], $data) ? $found[$str[0]] = $data[$str[0]] : NULL;
-
-			return $found;
+			return $content ?: array();
 		}
 
 		/**
