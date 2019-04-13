@@ -2,6 +2,8 @@
 
 	namespace ResponseHTTP\Response\Traits;
 
+	use Symfony\Component\HttpFoundation\Response as BaseResponse;
+
 	trait ConditionalHeaders
 	{
 		/**
@@ -24,9 +26,10 @@
 		public function getEtagPlayload(): array
 		{
 			$playloads = [];
-			$etag = $this->getEtags();
-			foreach ($etag as $item) {
-				list($code, $key, $timestamp) = explode('.', base64_decode($item));
+			$etags = $this->getEtags();
+
+			foreach ($etags as $etag) {
+				list($code, $key, $timestamp) = explode('.', base64_decode($etag));
 				$playload = [
 					"code" => $code,
 					"key" => $key,
@@ -53,8 +56,15 @@
 		 */
 		public function setEtagPlayload(string $key = '', string $code = '0x', bool $weak = false) {
 			$key = $key ?: str_random(10);
-			$etag = base64_encode($code . '.' . $key . '.' . date("Y-m-d H:i:s"));
-			return $this->setEtag($etag,$weak);
+			$newEtag = base64_encode($code . '.' . $key . '.' . date("Y-m-d H:i:s"));
+
+			$etags = $this->headers->get('ETag') ? : '';
+
+			$etags .= (true === $weak ? 'W/ ' : '') . "\"" . $newEtag . "\",";
+
+			$this->headers->set('ETag', $etags);
+
+			return $this;
 		}
 
 		/**
@@ -68,15 +78,12 @@
 		 *
 		 * @return $this
 		 */
-		public function setEtags(array $etags = array(), bool $weak = false) {
-			$newEtag = $this->getEtag()? $this->getEtag() . "," :'';
+		public function setEtags(array $etags = array(), string $code = '0x', bool $weak = false) {
 
 			foreach ($etags as $etag) {
 				if (is_string($etag))
-					$newEtag .= (true === $weak ? 'W/' : '') . " \"" . $etag . "\", ";
+					$this->setEtagPlayload($etag, $code, $weak);
 			}
-
-			$this->headers->set('ETag', $newEtag);
 
 			return $this;
 		}
@@ -153,6 +160,6 @@
 		}
 
 		private function explodeEtag(string $etags){
-			return explode(', ', str_replace('"', '', $etags));
+			return explode(',', trim(str_replace('"', '', $etags)),-1);
 		}
 	}
