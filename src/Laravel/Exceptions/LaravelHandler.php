@@ -44,6 +44,6 @@
 		 */
 		public function render($request, Exception $e)
 		{
-			return (new \ServiceResponse\Laravel\Exceptions\Handler())->handle($e);
+			return (new \ServiceResponse\Response\Exceptions\Handler())->handle($e);
 		}
 	}

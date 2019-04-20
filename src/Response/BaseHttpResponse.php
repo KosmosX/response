@@ -10,14 +10,13 @@
 
 	use ServiceResponse\Response\Traits\ConditionalHeaders;
 	use ServiceResponse\Response\Traits\EtagHeaders;
+	use ServiceResponse\Response\Traits\Utilities;
 	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 	use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 	class BaseHttpResponse extends BaseJsonResponse
 	{
-		use ConditionalHeaders, EtagHeaders;
-
-		protected $metadata = null;
+		use ConditionalHeaders, EtagHeaders, Utilities;
 
 		/**
 		 * @param string|NULL $type
@@ -28,35 +27,12 @@
 		 */
 		public function __costructor(?string $type, $data = null, int $status = 200, array $headers = array(), bool $json = false)
 		{
-			$this->init($type, $status, $headers, $json);
+			$this->set($type, $status, $headers, $json);
 
 			if (null === $data)
 				$data = array_key_exists($status, self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
 
 			$this->withContent($type, $data, false, $json);
-		}
-
-		/**
-		 * Init response
-		 *
-		 * @param null  $type
-		 * @param int   $status
-		 * @param array $headers
-		 * @param bool  $json
-		 */
-		private function init($type = null, $status = 200, $headers = array(), $json = false)
-		{
-			$this->headers = new ResponseHeaderBag($headers);
-			$this->setStatusCode($status);
-			$this->setProtocolVersion('1.0');
-
-			$metadata = array('init' => [
-				'type' => $type,
-				'status' => (string)$status,
-				'headers' => $headers ? true : false,
-				'json' => $json,
-			]);
-			$this->setMetadata($metadata);
 		}
 
 		/**
@@ -89,80 +65,6 @@
 
 			$this->setData($data);
 			return $this;
-		}
-
-		/**
-		 * Ger data json_encode
-		 * or can get only element with key / keys
-		 *
-		 * @param string ...$_fields
-		 *
-		 * @return array|mixed
-		 */
-		public function getData(string ...$_fields): array
-		{
-			$data = json_decode($this->data, true);
-			if (!empty($_fields))
-				return $this->find($data, $_fields);
-
-			return $data ?: array();
-		}
-
-		/**
-		 * Find keys in array data and return only element found
-		 *
-		 * @param array  $data
-		 * @param bool   $json
-		 * @param string ...$_gets
-		 *
-		 * @return array
-		 */
-		protected function find($data = array(), ...$_gets): array
-		{
-			$found = array();
-			foreach ($_gets as $str)
-				array_key_exists($str[0], $data) ? $found[$str[0]] = $data[$str[0]] : null;
-
-			return $found;
-		}
-
-		/**
-		 * Get element of array with dot notation
-		 *
-		 * @param array  $data
-		 * @param string $needle
-		 * @param string $separator
-		 *
-		 * @return array|mixed
-		 */
-		private function getArrayByPath(array $data, string $needle, string $separator = '.')
-		{
-			$keys = explode($separator, $needle);
-
-			foreach ($keys as $key)
-				$data = &$data[$key];
-
-			//return last element
-			return $data ?: null;
-		}
-
-		/**
-		 * Assign to element value with dot notation
-		 *
-		 * @param array  $data
-		 * @param string $needle
-		 * @param        $value
-		 * @param string $separator
-		 */
-		private function assignArrayByPath(array &$data, string $needle, $value, string $separator = '.')
-		{
-			$keys = explode($separator, $needle);
-
-			foreach ($keys as $key)
-				$data = &$data[$key];
-
-			//assign value to last element
-			$data = $value;
 		}
 
 		/**
@@ -315,57 +217,6 @@
 			$this->withContent('links', $link, false);
 
 			return $this;
-		}
-
-		/**
-		 * Ger metadata
-		 * Can get only element with key / keys
-		 *
-		 * @param mixed ...$fields
-		 *
-		 * @return array
-		 */
-		public function getMetadata(string ...$_fields): array
-		{
-			$metadata = json_decode($this->metadata, true);
-
-			if (!empty($_fields))
-				return $this->find($metadata, $_fields);
-
-			return $metadata;
-		}
-
-		/**
-		 * Set metadata of response
-		 *
-		 * @param array $values
-		 */
-		public function setMetadata(array $values): void
-		{
-			$metadata = json_decode($this->metadata, true);
-
-			foreach ($values as $key => $value)
-				$metadata[$key] = $value;
-
-			$this->metadata = json_encode($metadata, JSON_FORCE_OBJECT);
-		}
-
-		/**
-		 * Ger content json_encode
-		 * or can get only element with key / keys
-		 *
-		 * @param bool $parent
-		 *
-		 * @return mixed|string
-		 */
-		public function getContent(string ...$_fields): array
-		{
-			$content = json_decode($this->content, true);
-
-			if (!empty($_fields))
-				return $this->find($content, $_fields);
-
-			return $content ?: array();
 		}
 
 		/**
