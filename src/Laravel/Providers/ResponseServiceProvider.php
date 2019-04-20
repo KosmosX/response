@@ -39,6 +39,7 @@
 			/**
 			 * Service Response
 			 */
-			$this->app->singleton('service.response', 'ServiceResponse\Response\HttpResponse');
+			$this->app->singleton('factory.response', 'ServiceResponse\Response\HttpResponse');
+			$this->app->singleton('service.response', 'ServiceResponse\Response\BaseHttpResponse');
 		}
 	}

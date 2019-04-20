@@ -55,7 +55,7 @@
 				$content['error']['debug'] = array_combine(array('file', 'line', 'trace'), array($e->getFile(), $e->getLine(), $e->getTraceAsString()));
 			}
 
-			return new HttpResponse($content, $status, $headers, false);
+			return (new HttpResponse())->error($content, $status, $headers);
 		}
 
 		/**

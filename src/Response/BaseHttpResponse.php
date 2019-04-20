@@ -32,7 +32,7 @@
 			if (null === $data)
 				$data = array_key_exists($status, self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
 
-			$this->withContent($type, $data, false, $json);
+			$this->withContent($type, $data, false);
 		}
 
 		/**

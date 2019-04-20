@@ -12,7 +12,7 @@
 		 * @param string $string
 		 * @return bool
 		 */
-		protected function isJSON(string $string):bool {
+		protected function isJSON($string):bool {
 			return is_string($string) && is_array(json_decode($string, true)) && (json_last_error() == JSON_ERROR_NONE) ? true : false;
 		}
 
@@ -67,8 +67,11 @@
 		 *
 		 * @return array|mixed
 		 */
-		protected function getArrayByPath(array $data, string $needle, string $separator = '.')
+		protected function getArrayByPath($data, string $needle, string $separator = '.')
 		{
+			if(!is_array($data))
+				return null;
+
 			$keys = explode($separator, $needle);
 
 			foreach ($keys as $key)
