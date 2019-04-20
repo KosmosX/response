@@ -29,7 +29,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function success($content = NULL, int $status = 200, array $headers = array());
+		public function success($content = NULL, int $status = 200, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias success for Resource created
@@ -41,7 +41,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function created($content = NULL, array $headers = array());
+		public function created($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias success for Request Accepted
@@ -53,7 +53,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function accepted($content = NULL, array $headers = array());
+		public function accepted($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias success for No content response
@@ -65,7 +65,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function noContent($content = NULL, array $headers = array());
+		public function noContent($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Method for data responses
@@ -77,7 +77,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function successData($content = NULL, int $status = 200, array $headers = array());
+		public function successData($content = NULL, int $status = 200, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias for not modified Response
@@ -89,7 +89,7 @@
 		 *
 		 * @return JsonResponse
 		 */
-		public function notModified(array $headers = array());
+		public function notModified(array $headers = array(), string $type = null);
 
 		/**
 		 * Method for error responses
@@ -109,7 +109,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function error($content = NULL, int $status = 400, array $headers = array());
+		public function error($content = NULL, int $status = 400, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for badRequest
@@ -121,7 +121,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function badRequest($content = NULL, array $headers = array());
+		public function badRequest($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for unauthorized
@@ -133,7 +133,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function unauthorized($content = NULL, array $headers = array());
+		public function unauthorized($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for forbidden
@@ -145,7 +145,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function forbidden($content = NULL, array $headers = array());
+		public function forbidden($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for notFound
@@ -157,7 +157,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function notFound($content = NULL, array $headers = array());
+		public function notFound($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for Method Not Allowed
@@ -169,7 +169,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function methodNotAllowed($content = NULL, array $headers = array());
+		public function methodNotAllowed($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for Request Timeout
@@ -181,7 +181,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function requestTimeout($content = NULL, array $headers = array());
+		public function requestTimeout($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for Precondition Failed
@@ -193,7 +193,7 @@
 		 *
 		 * @return JsonResponse
 		 */
-		public function preconditionFailed($content = NULL, array $headers = array());
+		public function preconditionFailed($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for MediaType
@@ -205,7 +205,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function mediaType($content = NULL, array $headers = array());
+		public function mediaType($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for Range Not Satisfiable
@@ -217,7 +217,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function rangeNotSatisfiable($content = NULL, array $headers = array());
+		public function rangeNotSatisfiable($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for Internal
@@ -229,7 +229,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function internal($content = NULL, array $headers = array());
+		public function internal($content = NULL, array $headers = array(), string $type = null);
 
 		/**
 		 * Alias error for ServiceUnavailable
@@ -241,7 +241,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function serviceUnavailable($content = NULL, int $status = 500, array $headers = array());
+		public function serviceUnavailable($content = NULL, int $status = 500, array $headers = array(), string $type = null);
 
 		/**
 		 * Metod for error exception

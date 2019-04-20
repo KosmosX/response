@@ -25,14 +25,12 @@
 		 * @param array $headers
 		 * @param bool $json
 		 */
-		public function __construct(?string $type, $data = null, int $status = 200, array $headers = array())
+		public function __construct($data = null, int $status = 200, array $headers = array(), ?string $type = null)
 		{
-			$this->set($type, $status, $headers);
+			$this->set($status, $headers);
 
-			if (null === $data)
-				$data = array_key_exists($status, self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
-
-			$this->withContent($type, $data, false);
+			if (null != $data)
+				$this->withContent($type, $data, true);
 		}
 
 		/**
@@ -53,8 +51,7 @@
 			$content = $this->getContent();
 
 			if (null == $type)
-				$content[] = $data;
-			else if (null === ($exist = $this->getArrayByPath($data, $type)) || $override) {
+				$content[] = $data; else if (null === ($exist = $this->getArrayByPath($data, $type)) || $override) {
 				$this->assignArrayByPath($content, $type, $data);
 			} else {
 				if (false === is_array($exist))
@@ -146,6 +143,22 @@
 		public function withMessage(string $message, bool $override = false): BaseHttpResponse
 		{
 			$this->withContent('message', $message, $override);
+			return $this;
+		}
+
+		/**
+		 * Alias to add State to content
+		 *
+		 * @param string $message
+		 * @param bool $override
+		 *
+		 * @return \ServiceResponse\Response\BaseHttpResponse
+		 */
+		public function withState(bool $override = false): BaseHttpResponse
+		{
+			$state = array_key_exists($this->statusCode, self::$statusTexts) ? self::$statusTexts[$this->statusCode] : 'null';
+			$this->withContent('state', $state, $override);
+
 			return $this;
 		}
 

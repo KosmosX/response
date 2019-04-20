@@ -24,15 +24,15 @@
 		 * @param array $headers
 		 * @param bool  $json
 		 */
-		protected function set($type = null, $status = 200, $headers = array(), $json = false)
+		protected function set($status_code = 200, $headers = array(), $json = false)
 		{
 			$this->headers = new ResponseHeaderBag($headers);
-			$this->setStatusCode($status);
+			$this->setStatusCode($status_code);
 			$this->setProtocolVersion('1.0');
 
 			$metadata = array('init' => [
-				'type' => $type,
-				'status' => (string)$status,
+				'state' => array_key_exists($status_code, self::$statusTexts) ? self::$statusTexts[$status_code] : 'null',
+				'code' => (string)$status_code,
 				'headers' => $headers ? true : false,
 				'json' => $json,
 			]);
