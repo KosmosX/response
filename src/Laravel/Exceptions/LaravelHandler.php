@@ -1,6 +1,6 @@
 <?php
 
-	namespace ResponseHTTP\Response\Laravel\Exceptions;
+	namespace ServiceResponse\Laravel\Exceptions;
 
 	use Exception;
 	use Illuminate\Validation\ValidationException;
@@ -44,6 +44,6 @@
 		 */
 		public function render($request, Exception $e)
 		{
-			return (new \ResponseHTTP\Response\Exceptions\Handler())->handle($e);
+			return (new \ServiceResponse\Laravel\Exceptions\Handler())->handle($e);
 		}
 	}

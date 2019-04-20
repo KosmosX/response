@@ -5,7 +5,7 @@
 	 * Date: 09/08/18
 	 * Time: 17.42
 	 */
-	namespace ResponseHTTP\Response\Laravel\Facades;
+	namespace ServiceResponse\Laravel\Facades;
 
 	use Illuminate\Support\Facades\Facade;
 

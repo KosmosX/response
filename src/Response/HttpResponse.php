@@ -6,15 +6,13 @@
 	 * Time: 16.30
 	 */
 
-	namespace ResponseHTTP\Response;
+	namespace ServiceResponse\Response;
 
-	use ResponseHTTP\Response\Traits\ConditionalHeaders;
+	use ServiceResponse\Response\Traits\ConditionalHeaders;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 
 	class HttpResponse extends BaseHttpResponse implements HttpResponseInterface
 	{
-		use ConditionalHeaders;
-
 		public function success($content = null, int $status = 200, array $headers = array(), bool $json = false) {
 			self::__costructor('success', $content, $status, $headers, $json);
 			return $this;

@@ -1,5 +1,5 @@
 {
-    "name": "fabrizio-cafolla/response-http",
+    "name": "fabrizio-cafolla/service-response",
     "description": "Response service for Symfony & Laravel/Lumen Framework.",
     "keywords": ["Symfony", "laravel", "lumen", "rest", "http", "response"],
     "license": "MIT",
@@ -23,9 +23,14 @@
         "symfony/http-kernel": "^4.2"
     },
 
+    "replace": {
+        "ServiceResponse/laravel": "self.version",
+        "ServiceResponse/response": "self.version"
+    },
+
     "autoload": {
         "psr-4": {
-            "ResponseHTTP\\": "src/"
+            "ServiceResponse\\": "src/"
         }
     },
 

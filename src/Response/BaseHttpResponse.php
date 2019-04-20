@@ -6,13 +6,17 @@
 	 * Time: 23.04
 	 */
 
-	namespace ResponseHTTP\Response;
+	namespace ServiceResponse\Response;
 
+	use ServiceResponse\Response\Traits\ConditionalHeaders;
+	use ServiceResponse\Response\Traits\EtagHeaders;
 	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 	use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 	class BaseHttpResponse extends BaseJsonResponse
 	{
+		use ConditionalHeaders, EtagHeaders;
+
 		protected $metadata = null;
 
 		/**
@@ -63,7 +67,7 @@
 		 * @param bool   $override
 		 * @param bool   $json
 		 *
-		 * @return \ResponseHTTP\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
 		public function withContent(?string $type, $content = array(), bool $override = false, bool $json = false): BaseHttpResponse
 		{
@@ -205,7 +209,7 @@
 		 * @param array $contents
 		 * @param bool  $override
 		 *
-		 * @return \ResponseHTTP\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
 		public function withContents(array $contents, bool $override = false): BaseHttpResponse
 		{
@@ -233,7 +237,7 @@
 		 * @param string $message
 		 * @param bool   $override
 		 *
-		 * @return \ResponseHTTP\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
 		public function withMessage(string $message, bool $override = false): BaseHttpResponse
 		{
@@ -247,7 +251,7 @@
 		 * @param array $message
 		 * @param bool  $override
 		 *
-		 * @return \ResponseHTTP\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
 		public function withIncluded(array $included, bool $override = false): BaseHttpResponse
 		{
@@ -261,7 +265,7 @@
 		 * @param array $message
 		 * @param bool  $override
 		 *
-		 * @return \ResponseHTTP\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
 		public function withValidation(array $validation, bool $override = false): BaseHttpResponse
 		{

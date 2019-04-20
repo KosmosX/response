@@ -5,7 +5,7 @@
 	 * Date: 16/09/18
 	 * Time: 21.33
 	 */
-	namespace ResponseHTTP\Response\Exceptions;
+	namespace ServiceResponse\Response\Exceptions;
 
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 	use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;

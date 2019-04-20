@@ -6,7 +6,7 @@
 	 * Time: 13.19
 	 */
 
-	namespace ResponseHTTP\Response\Laravel\Providers;
+	namespace ServiceResponse\Laravel\Providers;
 
 	use Illuminate\Support\ServiceProvider;
 
@@ -28,7 +28,7 @@
 		 */
 		protected function registerAlias()
 		{
-			class_alias(\ResponseHTTP\Response\Laravel\Facades\ResponseFacade::class, 'ServiceResponse');
+			class_alias(\ServiceResponse\Laravel\Facades\ResponseFacade::class, 'ServiceResponse');
 		}
 
 		/**
@@ -39,6 +39,6 @@
 			/**
 			 * Service Response
 			 */
-			$this->app->singleton('service.response', 'ResponseHTTP\Response\HttpResponse');
+			$this->app->singleton('service.response', 'ServiceResponse\Laravel\HttpResponse');
 		}
 	}

@@ -6,9 +6,9 @@
 	 * Time: 21.08
 	 */
 
-	namespace ResponseHTTP\Response\Exceptions;
+	namespace ServiceResponse\Response\Exceptions;
 
-	use ResponseHTTP\Response\HttpResponse;
+	use ServiceResponse\Response\HttpResponse;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 
 	class Handler
@@ -31,7 +31,7 @@
 		 *
 		 * @param \Exception $e
 		 *
-		 * @return \ResponseHTTP\Response\HttpResponse
+		 * @return \ServiceResponse\Response\HttpResponse
 		 */
 		public function handle(\Exception $e)
 		{

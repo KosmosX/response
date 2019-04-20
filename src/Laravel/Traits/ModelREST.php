@@ -6,7 +6,7 @@
 	 * Time: 13.42
 	 */
 
-	namespace ResponseHTTP\Response\Traits;
+	namespace ServiceResponse\Laravel\Traits;
 
 	use Illuminate\Support\Facades\URL;
 

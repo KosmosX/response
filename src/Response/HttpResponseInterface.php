@@ -6,7 +6,7 @@
 	 * Time: 23.01
 	 */
 
-	namespace ResponseHTTP\Response;
+	namespace ServiceResponse\Response;
 
 
 	interface HttpResponseInterface
