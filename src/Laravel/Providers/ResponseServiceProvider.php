@@ -39,6 +39,6 @@
 			/**
 			 * Service Response
 			 */
-			$this->app->singleton('service.response', 'ServiceResponse\Laravel\HttpResponse');
+			$this->app->singleton('service.response', 'ServiceResponse\Response\HttpResponse');
 		}
 	}

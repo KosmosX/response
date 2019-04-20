@@ -2,8 +2,6 @@
 
 	namespace ServiceResponse\Response\Traits;
 
-	use Symfony\Component\HttpFoundation\Response as BaseResponse;
-
 	trait EtagHeaders
 	{
 		/**
