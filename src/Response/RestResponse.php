@@ -14,7 +14,7 @@
 	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 	use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
-	class BaseHttpResponse extends BaseJsonResponse
+	class RestResponse extends BaseJsonResponse
 	{
 		use ConditionalHeaders, EtagHeaders, Utilities;
 
@@ -41,9 +41,9 @@
 		 * @param bool $override
 		 * @param bool $json
 		 *
-		 * @return \ServiceResponse\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\RestResponse
 		 */
-		public function withContent(?string $type, $data = array(), bool $override = false): BaseHttpResponse
+		public function withContent(?string $type, $data = array(), bool $override = false): self
 		{
 			if ($this->isJSON($data))
 				$data = json_decode($data, true);
@@ -75,7 +75,7 @@
 		 *
 		 * @return $this
 		 */
-		public function withHeader($key, $values, $replace = true): BaseHttpResponse
+		public function withHeader($key, $values, $replace = true): self
 		{
 			$this->headers->set($key, $values, $replace);
 			return $this;
@@ -88,7 +88,7 @@
 		 *
 		 * @return $this
 		 */
-		public function withHeaders($headers): BaseHttpResponse
+		public function withHeaders($headers): self
 		{
 			if ($headers instanceof HeaderBag) {
 				$headers = $headers->all();
@@ -110,9 +110,9 @@
 		 * @param array $contents
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\RestResponse
 		 */
-		public function withContents(array $contents, bool $override = false): BaseHttpResponse
+		public function withContents(array $contents, bool $override = false): self
 		{
 			foreach ($contents as $type => $content)
 				$this->withContent($type, $content, $override);
@@ -126,7 +126,7 @@
 		 *
 		 * @return $this
 		 */
-		public function withData($data, bool $override = false): BaseHttpResponse
+		public function withData($data, bool $override = false): self
 		{
 			$this->withContent('data', $data, $override);
 			return $this;
@@ -138,9 +138,9 @@
 		 * @param string $message
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\RestResponse
 		 */
-		public function withMessage(string $message, bool $override = false): BaseHttpResponse
+		public function withMessage(string $message, bool $override = false): self
 		{
 			$this->withContent('message', $message, $override);
 			return $this;
@@ -152,9 +152,9 @@
 		 * @param string $message
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\RestResponse
 		 */
-		public function withState(bool $override = false): BaseHttpResponse
+		public function withState(bool $override = false): self
 		{
 			$state = array_key_exists($this->statusCode, self::$statusTexts) ? self::$statusTexts[$this->statusCode] : 'null';
 			$this->withContent('state', $state, $override);
@@ -168,9 +168,9 @@
 		 * @param array $message
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\RestResponse
 		 */
-		public function withIncluded(array $included, bool $override = false): BaseHttpResponse
+		public function withIncluded(array $included, bool $override = false): self
 		{
 			$this->withContent('included', $included, $override);
 			return $this;
@@ -182,9 +182,9 @@
 		 * @param array $message
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\BaseHttpResponse
+		 * @return \ServiceResponse\Response\RestResponse
 		 */
-		public function withValidation(array $validation, bool $override = false): BaseHttpResponse
+		public function withValidation(array $validation, bool $override = false): self
 		{
 			$this->withContent('validationErrors', $validation, $override);
 			return $this;
@@ -205,7 +205,7 @@
 		 *
 		 * @return $this
 		 */
-		public function withLinks(array $links, bool $hateoas = true): BaseHttpResponse
+		public function withLinks(array $links, bool $hateoas = true): self
 		{
 			foreach ($links as $link)
 				$this->withLink($link, $hateoas);
@@ -221,7 +221,7 @@
 		 *
 		 * @return $this
 		 */
-		public function withLink(array $link, bool $hateoas = true): BaseHttpResponse
+		public function withLink(array $link, bool $hateoas = true): self
 		{
 			if ($hateoas) {
 				list($processed['rel'], $processed['href'], $processed['method']) = array_pad(array_values($link), 3, '');
@@ -239,7 +239,7 @@
 		 *
 		 * @return $this
 		 */
-		public function reset(): BaseHttpResponse
+		public function reset(): self
 		{
 			$this->setJson("");
 			return $this;

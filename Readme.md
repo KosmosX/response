@@ -14,28 +14,28 @@
     
 **Laravel / Lumen register providers**
 
-    ResponseServiceProvider
+    ServiceResponse\Laravel\ResponseServiceProvider
     
 **Register handler Execptions (LaravelHandler or LumenHandler)**
 
     $this->app->singleton(
         \Illuminate\Contracts\Debug\ExceptionHandler::class,
-        \ResponseHTTP\Response\Laravel\Exceptions\.....::class
+        \ServiceResponse\Laravel\Exceptions\.....::class
     );
     
 **Use**
 
-    use ServiceResponse\Response\HttpResponse;
-    use ServiceResponse; //Facade alias
+    use ServiceResponse\Response\RestResponse;
+    use RestResponse; //Facade alias
     
 
     
 **PHP 7.1**
 
     require __DIR__ . '/vendor/autoload.php';
-    $response = new ResponseHTTP\Response\HttpResponse();
+    $response = new ServiceResponse\Response\RestResponse();
 
-    $handler = ResponseHTTP\Response\Exceptions\Handler();
+    $handler = ServiceResponse\Response\Exceptions\Handler();
     $handler->setExceptionHandler();    
 
 **en**: [documentation](https://github.com/FabrizioCafolla/response-http/wiki/Response-http-documentation)

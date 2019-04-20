@@ -8,7 +8,7 @@
 
 	namespace ServiceResponse\Response\Exceptions;
 
-	use ServiceResponse\Response\HttpResponse;
+	use ServiceResponse\Response\RestResponse;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 
 	class Handler
@@ -55,7 +55,7 @@
 				$content['error']['debug'] = array_combine(array('file', 'line', 'trace'), array($e->getFile(), $e->getLine(), $e->getTraceAsString()));
 			}
 
-			return (new HttpResponse())->error($content, $status, $headers);
+			return new RestResponse($content, $status, $headers);
 		}
 
 		/**

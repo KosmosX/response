@@ -28,7 +28,7 @@
 		 */
 		protected function registerAlias()
 		{
-			class_alias(\ServiceResponse\Laravel\Facades\ResponseFacade::class, 'ServiceResponse');
+			class_alias(\ServiceResponse\Laravel\Facades\RestResponse::class, 'ServiceResponse');
 		}
 
 		/**
@@ -39,7 +39,7 @@
 			/**
 			 * Service Response
 			 */
-			$this->app->singleton('factory.response', 'ServiceResponse\Response\HttpResponse');
-			$this->app->singleton('service.response', 'ServiceResponse\Response\BaseHttpResponse');
+			$this->app->bind('factory.response', 'ServiceResponse\Response\Factory\FactoryServiceResponse');
+			$this->app->singleton('service.response', 'ServiceResponse\Response\RestResponse');
 		}
 	}
