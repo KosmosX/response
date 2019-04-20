@@ -8,88 +8,83 @@
 
 	namespace ServiceResponse\Response;
 
-	use ServiceResponse\Response\Traits\ConditionalHeaders;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 
-	class HttpResponse extends BaseHttpResponse implements HttpResponseInterface
+	class HttpResponse implements HttpResponseInterface
 	{
-		public function success($content = null, int $status = 200, array $headers = array(), bool $json = false) {
-			self::__costructor('success', $content, $status, $headers, $json);
-			return $this;
+		public function success($content = null, int $status = 200, array $headers = array()) {
+			return new BaseHttpResponse('success', $content, $status, $headers);
 		}
 
-		public function successCreated($content = null, int $status = 201, array $headers = array(), bool $json = false) {
-			return $this->success($content, $status, $headers, $json);
+		public function created($content = null, array $headers = array()) {
+			return new BaseHttpResponse('success', $content, 201, $headers);
 		}
 
-		public function successAccepted($content = null, int $status = 202, array $headers = array(), bool $json = false) {
-			return $this->success($content, $status, $headers, $json);
+		public function accepted($content = null, array $headers = array()) {
+			return new BaseHttpResponse('success', $content, 204, $headers);
 		}
 
-		public function successNoContent($content = null, int $status = 204, array $headers = array(), bool $json = false) {
-			return $this->success($content, $status, $headers, $json);
+		public function noContent($content = null, array $headers = array()) {
+			return new BaseHttpResponse('success', $content, 204, $headers);
 		}
 
-		public function successData($content = NULL, int $status = 200, array $headers = array(), bool $json = false) {
-			self::__costructor('data', $content, $status, $headers, $json);
-			return $this;
+		public function successData($content = NULL, int $status = 200, array $headers = array()) {
+			return new BaseHttpResponse('data', $content, $status, $headers);
 		}
 
-		public function error($content = null, int $status = 400, array $headers = array(), bool $json = false) {
-			self::__costructor('errors', $content, $status, $headers, $json);
-			return $this;
+		public function error($content = null, int $status = 400, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, $status, $headers);
 		}
 
-		public function errorBadRequest($content = null, int $status = 400, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function badRequest($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 400, $headers);
 		}
 
-		public function errorUnauthorized($content = null, int $status = 401, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function unauthorized($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 401, $headers);
 		}
 
-		public function errorForbidden($content = null, int $status = 403, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function forbidden($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 403, $headers);
 		}
 
-		public function errorNotFound($content = null, int $status = 404, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function notFound($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 404, $headers);
 		}
 
-		public function errorMethodNotAllowed($content = null, int $status = 405, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function methodNotAllowed($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 405, $headers);
 		}
 
-		public function errorRequestTimeout($content = null, int $status = 408, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function requestTimeout($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 408, $headers);
 		}
 
-		public function errorPreconditionFailed($content = null, int $status = 412, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function preconditionFailed($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 412, $headers);
 		}
 
-		public function errorMediaType($content = null, int $status = 415, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function mediaType($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 415,  $headers);
 		}
 
-		public function errorRangeNotSatisfiable($content = null, int $status = 416, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function rangeNotSatisfiable($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 416, $headers);
 		}
 
-		public function errorInternal($content = null, int $status = 500, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function internal($content = null, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, 500, $headers);
 		}
 
-		public function errorServiceUnavailable($content = null, int $status = 500, array $headers = array(), bool $json = false) {
-			return $this->error($content, $status, $headers, $json);
+		public function serviceUnavailable($content = null, int $status = 500, array $headers = array()) {
+			return new BaseHttpResponse('errors', $content, $status, $headers);
 		}
 
-		public static function errorException($content, int $status = 400, array $headers = array(), $code = 0) {
+		public static function exception($content, int $status = 400, array $headers = array(), $code = 0) {
 			throw new HttpException($status, $content, null, $headers, $code);
 		}
 
 		public function notModified(array $headers = array()) {
-			self::__costructor(null, array(), 304, $headers);
-			return $this;
+			return new BaseHttpResponse(null, null, 304, $headers);
 		}
 	}

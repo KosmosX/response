@@ -20,14 +20,14 @@
 
 		/**
 		 * @param string|NULL $type
-		 * @param null        $data
-		 * @param int         $status
-		 * @param array       $headers
-		 * @param bool        $json
+		 * @param null $data
+		 * @param int $status
+		 * @param array $headers
+		 * @param bool $json
 		 */
-		public function __costructor(?string $type, $data = null, int $status = 200, array $headers = array(), bool $json = false)
+		public function __construct(?string $type, $data = null, int $status = 200, array $headers = array())
 		{
-			$this->set($type, $status, $headers, $json);
+			$this->set($type, $status, $headers);
 
 			if (null === $data)
 				$data = array_key_exists($status, self::$statusTexts) ? self::$statusTexts[$status] : new \ArrayObject();
@@ -39,40 +39,42 @@
 		 * Add element to content response
 		 *
 		 * @param string $type
-		 * @param array  $content
-		 * @param bool   $override
-		 * @param bool   $json
+		 * @param array $content
+		 * @param bool $override
+		 * @param bool $json
 		 *
 		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
-		public function withContent(?string $type, $content = array(), bool $override = false, bool $json = false): BaseHttpResponse
+		public function withContent(?string $type, $data = array(), bool $override = false): BaseHttpResponse
 		{
-			if ($json)
-				$content = json_decode($content, true);
+			if ($this->isJSON($data))
+				$data = json_decode($data, true);
 
-			$data = $this->getData();
+			$content = $this->getContent();
 
 			if (null == $type)
-				$data[] = $content;
-			else
-				if (null === ($exist = $this->getArrayByPath($data, $type)) || $override) {
-					$this->assignArrayByPath($data, $type, $content);
-				} else {
-					if (false === is_array($exist)) $exist = (array)$exist;
-					if (false === is_array($content)) $content = (array)$content;
-					$this->assignArrayByPath($data, $type, array_merge($exist, $content));
-				}
+				$content[] = $data;
+			else if (null === ($exist = $this->getArrayByPath($data, $type)) || $override) {
+				$this->assignArrayByPath($content, $type, $data);
+			} else {
+				if (false === is_array($exist))
+					$exist = (array)$exist;
+				if (false === is_array($data))
+					$data = (array)$data;
+				$this->assignArrayByPath($content, $type, array_merge($exist, $data));
+			}
 
-			$this->setData($data);
+			$this->setData($content);
+
 			return $this;
 		}
 
 		/**
 		 * Set a header on the Response.
 		 *
-		 * @param  string       $key
-		 * @param  array|string $values
-		 * @param  bool         $replace
+		 * @param string $key
+		 * @param array|string $values
+		 * @param bool $replace
 		 *
 		 * @return $this
 		 */
@@ -85,7 +87,7 @@
 		/**
 		 * Add an array of headers to the response.
 		 *
-		 * @param  \Symfony\Component\HttpFoundation\HeaderBag|array $headers
+		 * @param \Symfony\Component\HttpFoundation\HeaderBag|array $headers
 		 *
 		 * @return $this
 		 */
@@ -109,7 +111,7 @@
 		 * ['output' => value] or ['output' => value, 'message' => value]
 		 *
 		 * @param array $contents
-		 * @param bool  $override
+		 * @param bool $override
 		 *
 		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
@@ -137,7 +139,7 @@
 		 * Alias to add Message to content
 		 *
 		 * @param string $message
-		 * @param bool   $override
+		 * @param bool $override
 		 *
 		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
@@ -151,7 +153,7 @@
 		 * Alias to add Included to content
 		 *
 		 * @param array $message
-		 * @param bool  $override
+		 * @param bool $override
 		 *
 		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
@@ -165,7 +167,7 @@
 		 * Alias to add Validation errors to content
 		 *
 		 * @param array $message
-		 * @param bool  $override
+		 * @param bool $override
 		 *
 		 * @return \ServiceResponse\Response\BaseHttpResponse
 		 */
@@ -186,7 +188,7 @@
 		 * ]
 		 *
 		 * @param array $links
-		 * @param bool  $hateoas
+		 * @param bool $hateoas
 		 *
 		 * @return $this
 		 */
@@ -202,7 +204,7 @@
 		 * Add singolar link to array links
 		 *
 		 * @param array $link
-		 * @param bool  $hateoas
+		 * @param bool $hateoas
 		 *
 		 * @return $this
 		 */

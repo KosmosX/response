@@ -9,6 +9,14 @@
 		protected $metadata = null;
 
 		/**
+		 * @param string $string
+		 * @return bool
+		 */
+		protected function isJSON(string $string):bool {
+			return is_string($string) && is_array(json_decode($string, true)) && (json_last_error() == JSON_ERROR_NONE) ? true : false;
+		}
+
+		/**
 		 * Init response
 		 *
 		 * @param null  $type
