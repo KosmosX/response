@@ -28,7 +28,7 @@
 		 */
 		protected function registerAlias()
 		{
-			class_alias(\ServiceResponse\Laravel\Facades\RestResponse::class, 'ServiceResponse');
+			class_alias(\ServiceResponse\Laravel\Facades\FactoryResponse::class, 'FactoryResponse');
 		}
 
 		/**

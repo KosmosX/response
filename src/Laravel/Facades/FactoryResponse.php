@@ -9,10 +9,10 @@
 
 	use Illuminate\Support\Facades\Facade;
 
-	class RestResponse extends Facade
+	class FactoryResponse extends Facade
 	{
 		protected static function getFacadeAccessor()
 		{
-			return 'service.response';
+			return 'factory.response';
 		}
 	}
