@@ -1,5 +1,5 @@
 {
-    "name": "fabrizio-cafolla/service-response",
+    "name": "cosmo-microservice/service-response",
     "description": "Response service for Symfony & Laravel/Lumen Framework.",
     "keywords": ["Symfony", "laravel", "lumen", "rest", "http", "response"],
     "license": "MIT",
