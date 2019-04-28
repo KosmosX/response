@@ -6,9 +6,9 @@
 	 * Time: 21.08
 	 */
 
-	namespace ServiceResponse\Response\Exceptions;
+	namespace Kosmosx\Response\Exceptions;
 
-	use ServiceResponse\Response\RestResponse;
+	use Kosmosx\Response\RestResponse;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 
 	class Handler
@@ -31,7 +31,7 @@
 		 *
 		 * @param \Exception $e
 		 *
-		 * @return \ServiceResponse\Response\HttpResponse
+		 * @return \Kosmosx\Response\HttpResponse
 		 */
 		public function handle(\Exception $e)
 		{

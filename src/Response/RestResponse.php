@@ -6,11 +6,11 @@
 	 * Time: 23.04
 	 */
 
-	namespace ServiceResponse\Response;
+	namespace Kosmosx\Response;
 
-	use ServiceResponse\Response\Traits\ConditionalHeaders;
-	use ServiceResponse\Response\Traits\EtagHeaders;
-	use ServiceResponse\Response\Traits\Utilities;
+	use Kosmosx\Response\Traits\ConditionalHeaders;
+	use Kosmosx\Response\Traits\EtagHeaders;
+	use Kosmosx\Response\Traits\Utilities;
 	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 	use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -41,7 +41,7 @@
 		 * @param bool $override
 		 * @param bool $json
 		 *
-		 * @return \ServiceResponse\Response\RestResponse
+		 * @return \Kosmosx\Response\RestResponse
 		 */
 		public function withContent(?string $type, $data = array(), bool $override = false): self
 		{
@@ -110,7 +110,7 @@
 		 * @param array $contents
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\RestResponse
+		 * @return \Kosmosx\Response\RestResponse
 		 */
 		public function withContents(array $contents, bool $override = false): self
 		{
@@ -138,7 +138,7 @@
 		 * @param string $message
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\RestResponse
+		 * @return \Kosmosx\Response\RestResponse
 		 */
 		public function withMessage(string $message, bool $override = false): self
 		{
@@ -152,7 +152,7 @@
 		 * @param string $message
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\RestResponse
+		 * @return \Kosmosx\Response\RestResponse
 		 */
 		public function withState(bool $override = false): self
 		{
@@ -168,7 +168,7 @@
 		 * @param array $message
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\RestResponse
+		 * @return \Kosmosx\Response\RestResponse
 		 */
 		public function withIncluded(array $included, bool $override = false): self
 		{
@@ -182,7 +182,7 @@
 		 * @param array $message
 		 * @param bool $override
 		 *
-		 * @return \ServiceResponse\Response\RestResponse
+		 * @return \Kosmosx\Response\RestResponse
 		 */
 		public function withValidation(array $validation, bool $override = false): self
 		{

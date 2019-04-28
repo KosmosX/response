@@ -1,6 +1,6 @@
 <?php
 
-	namespace ServiceResponse\Laravel\Exceptions;
+	namespace Kosmosx\Laravel\Exceptions;
 
 	use Exception;
 	use Illuminate\Validation\ValidationException;
@@ -44,6 +44,6 @@
 		 */
 		public function render($request, Exception $e)
 		{
-			return (new \ServiceResponse\Response\Exceptions\Handler())->handle($e);
+			return (new \Kosmosx\Response\Exceptions\Handler())->handle($e);
 		}
 	}

@@ -5,7 +5,7 @@
 	 * Date: 16/09/18
 	 * Time: 21.33
 	 */
-	namespace ServiceResponse\Response\Exceptions;
+	namespace Kosmosx\Response\Exceptions;
 
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 	use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;

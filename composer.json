@@ -1,5 +1,5 @@
 {
-    "name": "cosmo-microservice/service-response",
+    "name": "kosmosx/response",
     "description": "Response service for Symfony & Laravel/Lumen Framework.",
     "keywords": ["Symfony", "laravel", "lumen", "rest", "http", "response"],
     "license": "MIT",
@@ -24,13 +24,13 @@
     },
 
     "replace": {
-        "ServiceResponse/laravel": "self.version",
-        "ServiceResponse/response": "self.version"
+        "Kosmosx/laravel": "self.version",
+        "Kosmosx/response": "self.version"
     },
 
     "autoload": {
         "psr-4": {
-            "ServiceResponse\\": "src/"
+            "Kosmosx\\": "src/"
         }
     },
 

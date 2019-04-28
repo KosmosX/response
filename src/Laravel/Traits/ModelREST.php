@@ -6,7 +6,7 @@
 	 * Time: 13.42
 	 */
 
-	namespace ServiceResponse\Laravel\Traits;
+	namespace Kosmosx\Laravel\Traits;
 
 	use Illuminate\Support\Facades\URL;
 

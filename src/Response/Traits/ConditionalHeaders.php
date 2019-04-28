@@ -1,6 +1,6 @@
 <?php
 
-	namespace ServiceResponse\Response\Traits;
+	namespace Kosmosx\Response\Traits;
 
 	trait ConditionalHeaders
 	{

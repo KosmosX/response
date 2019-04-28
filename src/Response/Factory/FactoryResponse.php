@@ -6,12 +6,12 @@
 	 * Time: 16.30
 	 */
 
-	namespace ServiceResponse\Response\Factory;
+	namespace Kosmosx\Response\Factory;
 
-	use ServiceResponse\Response\RestResponse;
+	use Kosmosx\Response\RestResponse;
 	use Symfony\Component\HttpKernel\Exception\HttpException;
 
-	class FactoryServiceResponse implements FactoryInterface
+	class FactoryResponse implements FactoryInterface
 	{
 		public function success($content = null, int $status = 200, array $headers = array(), string $type = null) {
 			return new RestResponse($content, $status, $headers, $type);

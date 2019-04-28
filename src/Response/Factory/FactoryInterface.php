@@ -6,7 +6,7 @@
 	 * Time: 23.01
 	 */
 
-	namespace ServiceResponse\Response\Factory;
+	namespace Kosmosx\Response\Factory;
 
 
 	interface FactoryInterface
