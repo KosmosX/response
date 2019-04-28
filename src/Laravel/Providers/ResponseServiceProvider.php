@@ -6,7 +6,7 @@
 	 * Time: 13.19
 	 */
 
-	namespace Kosmosx\Laravel\Providers;
+	namespace Kosmosx\Response\Laravel\Providers;
 
 	use Illuminate\Support\ServiceProvider;
 
@@ -28,7 +28,7 @@
 		 */
 		protected function registerAlias()
 		{
-			class_alias(\Kosmosx\Laravel\Facades\FactoryResponse::class, 'FactoryResponse');
+			class_alias(\Kosmosx\Response\Laravel\Facades\FactoryResponse::class, 'FactoryResponse');
 		}
 
 		/**

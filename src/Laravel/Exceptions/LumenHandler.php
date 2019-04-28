@@ -1,6 +1,6 @@
 <?php
 
-	namespace Kosmosx\Laravel\Exceptions;
+	namespace Kosmosx\Response\Laravel\Exceptions;
 
 	use Exception;
 	use Illuminate\Validation\ValidationException;

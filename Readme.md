@@ -14,13 +14,13 @@
     
 **Laravel / Lumen register providers**
 
-    Kosmosx\Laravel\ResponseServiceProvider
+    Kosmosx\Response\Laravel\ResponseServiceProvider
     
 **Register handler Execptions (LaravelHandler or LumenHandler)**
 
     $this->app->singleton(
         \Illuminate\Contracts\Debug\ExceptionHandler::class,
-        \Kosmosx\Laravel\Exceptions\.....::class
+        \Kosmosx\Response\Laravel\Exceptions\.....::class
     );
     
 **Use**

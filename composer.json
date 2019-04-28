@@ -23,14 +23,9 @@
         "symfony/http-kernel": "^4.2"
     },
 
-    "replace": {
-        "Kosmosx/laravel": "self.version",
-        "Kosmosx/response": "self.version"
-    },
-
     "autoload": {
         "psr-4": {
-            "Kosmosx\\": "src/"
+            "Kosmosx\\Response\\": "src/"
         }
     },
 
