@@ -45,13 +45,17 @@
 		 */
 		public function withContent(?string $type, $data = array(), bool $override = false): self
 		{
-			if ($this->isJSON($data))
-				$data = json_decode($data, true);
+			if ($_data = $this->isJSON($data)){
+				$data = $_data;
+				unset($_data);
+			}
 
 			$content = $this->getContent();
+			$exist = $this->getArrayByPath($content, $type);
 
 			if (null == $type)
-				$content[] = $data; else if (null === ($exist = $this->getArrayByPath($data, $type)) || $override) {
+				$content[] = $data;
+			else if (null == $exist || $override) {
 				$this->assignArrayByPath($content, $type, $data);
 			} else {
 				if (false === is_array($exist))
@@ -154,7 +158,7 @@
 		 *
 		 * @return \Kosmosx\Response\RestResponse
 		 */
-		public function withState(bool $override = false): self
+		public function withState(bool $override = true): self
 		{
 			$state = array_key_exists($this->statusCode, self::$statusTexts) ? self::$statusTexts[$this->statusCode] : 'null';
 			$this->withContent('state', $state, $override);

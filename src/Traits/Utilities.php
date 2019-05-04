@@ -12,8 +12,13 @@
 		 * @param string $string
 		 * @return bool
 		 */
-		protected function isJSON($string):bool {
-			return is_string($string) && is_array(json_decode($string, true)) && (json_last_error() == JSON_ERROR_NONE) ? true : false;
+		protected function isJSON($string):?string {
+			if(is_string($string)) {
+				$decoded = json_decode($string, true);
+				if(is_array($decoded) && (json_last_error() == JSON_ERROR_NONE))
+					return $decoded;
+			}
+			return null;
 		}
 
 		/**
@@ -24,17 +29,16 @@
 		 * @param array $headers
 		 * @param bool  $json
 		 */
-		protected function set($status_code = 200, $headers = array(), $json = false)
+		protected function set($status_code = 200, $headers = array())
 		{
 			$this->headers = new ResponseHeaderBag($headers);
 			$this->setStatusCode($status_code);
-			$this->setProtocolVersion('1.0');
+			$this->setProtocolVersion('2');
 
 			$metadata = array('init' => [
 				'state' => array_key_exists($status_code, self::$statusTexts) ? self::$statusTexts[$status_code] : 'null',
 				'code' => (string)$status_code,
-				'headers' => $headers ? true : false,
-				'json' => $json,
+				'headers' => $headers ? true : false
 			]);
 
 			$this->setMetadata($metadata);
