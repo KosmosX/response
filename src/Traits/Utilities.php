@@ -6,8 +6,6 @@
 
 	trait Utilities
 	{
-		protected $metadata = null;
-
 		/**
 		 * @param string $string
 		 * @return bool
@@ -19,29 +17,6 @@
 					return $decoded;
 			}
 			return null;
-		}
-
-		/**
-		 * Init response
-		 *
-		 * @param null  $type
-		 * @param int   $status
-		 * @param array $headers
-		 * @param bool  $json
-		 */
-		protected function set($status_code = 200, $headers = array())
-		{
-			$this->headers = new ResponseHeaderBag($headers);
-			$this->setStatusCode($status_code);
-			$this->setProtocolVersion('2');
-
-			$metadata = array('init' => [
-				'state' => array_key_exists($status_code, self::$statusTexts) ? self::$statusTexts[$status_code] : 'null',
-				'code' => (string)$status_code,
-				'headers' => $headers ? true : false
-			]);
-
-			$this->setMetadata($metadata);
 		}
 
 		/**
@@ -71,9 +46,9 @@
 		 *
 		 * @return array|mixed
 		 */
-		protected function getArrayByPath($data, string $needle, string $separator = '.')
+		protected function getArrayByPath($data, ?string $needle, string $separator = '.')
 		{
-			if(!is_array($data))
+			if(!is_array($data) || !$needle)
 				return null;
 
 			$keys = explode($separator, $needle);
@@ -138,21 +113,6 @@
 				return $this->find($metadata, $_fields);
 
 			return $metadata;
-		}
-
-		/**
-		 * Set metadata of response
-		 *
-		 * @param array $values
-		 */
-		public function setMetadata(array $values): void
-		{
-			$metadata = json_decode($this->metadata, true);
-
-			foreach ($values as $key => $value)
-				$metadata[$key] = $value;
-
-			$this->metadata = json_encode($metadata, JSON_FORCE_OBJECT);
 		}
 
 		/**

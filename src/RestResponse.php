@@ -17,6 +17,7 @@
 	class RestResponse extends BaseJsonResponse
 	{
 		use ConditionalHeaders, EtagHeaders, Utilities;
+		protected $metadata = null;
 
 		/**
 		 * @param string|NULL $type
@@ -45,24 +46,20 @@
 		 */
 		public function withContent(?string $type, $data = array(), bool $override = false): self
 		{
-			if ($_data = $this->isJSON($data)){
+			if ($_data = $this->isJSON($data)) {
 				$data = $_data;
-				unset($_data);
 			}
+			unset($_data);
 
-			$content = $this->getContent();
-			$exist = $this->getArrayByPath($content, $type);
-
-			if (null == $type)
+			if (null == $type) {
 				$content[] = $data;
-			else if (null == $exist || $override) {
-				$this->assignArrayByPath($content, $type, $data);
 			} else {
-				if (false === is_array($exist))
-					$exist = (array)$exist;
-				if (false === is_array($data))
-					$data = (array)$data;
-				$this->assignArrayByPath($content, $type, array_merge($exist, $data));
+				$content = $this->getContent();
+				$exist = $this->getArrayByPath($content, $type);
+				if (null == $exist || $override)
+					$this->assignArrayByPath($content, $type, $data);
+				else
+					$this->assignArrayByPath($content, $type, array_merge((array)$exist, (array)$data));
 			}
 
 			$this->setData($content);
@@ -239,13 +236,50 @@
 		}
 
 		/**
+		 * Init response
+		 *
+		 * @param null $type
+		 * @param int $status
+		 * @param array $headers
+		 * @param bool $json
+		 */
+		protected function set(int $status_code = 200, array $headers = array())
+		{
+			$this->headers = new ResponseHeaderBag($headers);
+			$this->setStatusCode($status_code);
+			$this->setProtocolVersion('1.1');
+		}
+
+		/**
+		 * Set metadata of response
+		 *
+		 * @param array $values
+		 */
+		public function setMetadata(array $values): void
+		{
+			$metadata = json_decode($this->metadata, true);
+
+			foreach ($values as $key => $value)
+				$metadata[$key] = $value;
+
+			$this->metadata = json_encode($metadata, JSON_FORCE_OBJECT);
+		}
+
+		/**
 		 * Reset response object
 		 *
 		 * @return $this
 		 */
 		public function reset(): self
 		{
+			$this->set($this->statusCode, $this->headers);
 			$this->setJson("");
 			return $this;
+		}
+
+		public function __toString()
+		{
+			$parent = parent::__toString(); 
+			return $parent . $this->getMetadata();
 		}
 	}
