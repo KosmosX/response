@@ -17,6 +17,7 @@
 	class RestResponse extends BaseJsonResponse
 	{
 		use ConditionalHeaders, EtagHeaders, Utilities;
+
 		protected $metadata = null;
 
 		/**
@@ -130,6 +131,19 @@
 		public function withData($data, bool $override = false): self
 		{
 			$this->withContent('data', $data, $override);
+			return $this;
+		}
+
+		/**
+		 * Alias to add Errors to content
+		 *
+		 * @param $data
+		 *
+		 * @return $this
+		 */
+		public function withError($error, bool $override = false): self
+		{
+			$this->withContent('errors', $error, $override);
 			return $this;
 		}
 
