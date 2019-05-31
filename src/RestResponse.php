@@ -11,6 +11,7 @@
 	use Kosmosx\Response\Traits\ConditionalHeaders;
 	use Kosmosx\Response\Traits\EtagHeaders;
 	use Kosmosx\Response\Traits\Utilities;
+	use Kosmosx\Response\Exceptions\RestException;
 	use Symfony\Component\HttpFoundation\JsonResponse as BaseJsonResponse;
 	use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
@@ -22,10 +23,10 @@
 
 		/**
 		 * @param string|NULL $type
-		 * @param null $data
-		 * @param int $status
-		 * @param array $headers
-		 * @param bool $json
+		 * @param null        $data
+		 * @param int         $status
+		 * @param array       $headers
+		 * @param bool        $json
 		 */
 		public function __construct($data = null, int $status = 200, array $headers = array(), ?string $type = null)
 		{
@@ -36,12 +37,26 @@
 		}
 
 		/**
+		 * Init response
+		 *
+		 * @param null  $type
+		 * @param int   $status
+		 * @param array $headers
+		 * @param bool  $json
+		 */
+		protected function set(int $status_code = 200, array $headers = array())
+		{
+			$this->headers = new ResponseHeaderBag($headers);
+			$this->setStatusCode($status_code);
+			$this->setProtocolVersion('1.1');
+		}
+
+		/**
 		 * Add element to content response
 		 *
-		 * @param string $type
-		 * @param array $content
-		 * @param bool $override
-		 * @param bool $json
+		 * @param null|string $type
+		 * @param array       $data
+		 * @param bool        $override
 		 *
 		 * @return \Kosmosx\Response\RestResponse
 		 */
@@ -52,15 +67,20 @@
 			}
 			unset($_data);
 
+			$content = $this->getContent();
+
 			if (null == $type) {
-				$content[] = $data;
+				if(empty($content))
+					$content = $data;
+				else
+					$content[] = $data;
 			} else {
-				$content = $this->getContent();
 				$exist = $this->getArrayByPath($content, $type);
 				if (null == $exist || $override)
 					$this->assignArrayByPath($content, $type, $data);
 				else
 					$this->assignArrayByPath($content, $type, array_merge((array)$exist, (array)$data));
+
 			}
 
 			$this->setData($content);
@@ -71,9 +91,9 @@
 		/**
 		 * Set a header on the Response.
 		 *
-		 * @param string $key
+		 * @param string       $key
 		 * @param array|string $values
-		 * @param bool $replace
+		 * @param bool         $replace
 		 *
 		 * @return $this
 		 */
@@ -110,7 +130,7 @@
 		 * ['output' => value] or ['output' => value, 'message' => value]
 		 *
 		 * @param array $contents
-		 * @param bool $override
+		 * @param bool  $override
 		 *
 		 * @return \Kosmosx\Response\RestResponse
 		 */
@@ -147,11 +167,18 @@
 			return $this;
 		}
 
+
+		public function withMeta(array $meta, bool $override = false): self
+		{
+			$this->withContent('meta', $meta, $override);
+			return $this;
+		}
+
 		/**
 		 * Alias to add Message to content
 		 *
 		 * @param string $message
-		 * @param bool $override
+		 * @param bool   $override
 		 *
 		 * @return \Kosmosx\Response\RestResponse
 		 */
@@ -162,10 +189,22 @@
 		}
 
 		/**
+		 * @param array $errors
+		 * @param bool  $override
+		 *
+		 * @return \Kosmosx\Response\RestResponse
+		 */
+		public function withErrors(array $errors, bool $override = false): self
+		{
+			$this->withContent('errors', $errors, $override);
+			return $this;
+		}
+
+		/**
 		 * Alias to add State to content
 		 *
 		 * @param string $message
-		 * @param bool $override
+		 * @param bool   $override
 		 *
 		 * @return \Kosmosx\Response\RestResponse
 		 */
@@ -181,7 +220,7 @@
 		 * Alias to add Included to content
 		 *
 		 * @param array $message
-		 * @param bool $override
+		 * @param bool  $override
 		 *
 		 * @return \Kosmosx\Response\RestResponse
 		 */
@@ -195,13 +234,13 @@
 		 * Alias to add Validation errors to content
 		 *
 		 * @param array $message
-		 * @param bool $override
+		 * @param bool  $override
 		 *
 		 * @return \Kosmosx\Response\RestResponse
 		 */
 		public function withValidation(array $validation, bool $override = false): self
 		{
-			$this->withContent('validationErrors', $validation, $override);
+			$this->withContent('errors.validation', $validation, $override);
 			return $this;
 		}
 
@@ -211,19 +250,33 @@
 		 *
 		 * //Example links array
 		 * links = [
-		 *      ['self','localhost/user','GET'],
-		 *      ['post','localhost/posts','GET']
+		 *      ['localhost/user'],
+		 *      ['localhost/posts','post','GET']
 		 * ]
 		 *
+		 * "links": {
+		 *    "self": "localhost/user",
+		 *    "post": {
+		 *  	"href": "localhost/posts",
+		 *	    "method": "GET"
+		 *    }
+		 *  }
+		 *
 		 * @param array $links
-		 * @param bool $hateoas
+		 * @param bool  $hateoas
 		 *
 		 * @return $this
 		 */
-		public function withLinks(array $links, bool $hateoas = true): self
+		public function withLinks(array $links): self
 		{
-			foreach ($links as $link)
-				$this->withLink($link, $hateoas);
+			foreach ($links as $key => $link) {
+				if(empty($link))
+					return $this;
+
+				$link = array_pad($link,4,null);
+
+				$this->withLink(...$link);
+			}
 
 			return $this;
 		}
@@ -232,36 +285,28 @@
 		 * Add singolar link to array links
 		 *
 		 * @param array $link
-		 * @param bool $hateoas
+		 * @param bool  $hateoas
 		 *
 		 * @return $this
 		 */
-		public function withLink(array $link, bool $hateoas = true): self
+		public function withLink(string $href, ?string $resource = null, ?string $method = null, ?array $meta = array()): self
 		{
-			if ($hateoas) {
-				list($processed['rel'], $processed['href'], $processed['method']) = array_pad(array_values($link), 3, '');
-				$link = $processed;
-				unset($processed);
+			$link = array();
+
+			if ($resource == null && $method == null && $meta == null)
+				$link['self'] = $href;
+			elseif ($resource != null && $method == null)
+					return $this;
+			else {
+				$link[$resource] = array('href'=>$href,'method'=>strtoupper($method));
+
+				if (!empty($meta))
+					$link['meta'] = $meta;
 			}
 
-			$this->withContent('links', $link, false);
+			$this->withContent('data.links', $link, false);
 
 			return $this;
-		}
-
-		/**
-		 * Init response
-		 *
-		 * @param null $type
-		 * @param int $status
-		 * @param array $headers
-		 * @param bool $json
-		 */
-		protected function set(int $status_code = 200, array $headers = array())
-		{
-			$this->headers = new ResponseHeaderBag($headers);
-			$this->setStatusCode($status_code);
-			$this->setProtocolVersion('1.1');
 		}
 
 		/**
@@ -293,7 +338,7 @@
 
 		public function __toString()
 		{
-			$parent = parent::__toString(); 
+			$parent = parent::__toString();
 			return $parent . $this->getMetadata();
 		}
 	}

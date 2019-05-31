@@ -53,6 +53,7 @@
 
 			$keys = explode($separator, $needle);
 
+
 			foreach ($keys as $key)
 				$data = &$data[$key];
 
