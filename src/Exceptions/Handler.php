@@ -20,13 +20,15 @@
 		 * @var
 		 */
 		protected static $prev;
+
 		/**
 		 * Handler running
 		 * @var
 		 */
 		protected static $handler;
+
 		/**
-		 * Symfony default exceptions
+		 * Default exceptions
 		 *
 		 * @var array
 		 */
@@ -121,12 +123,13 @@
 			$content = array('errors' => array());
 
 			$methodException = $this->_detectMethodException($e);
+
 			if (null != $methodException)
 				$this->{$methodException}($e, $content, $status, $headers);
 			else
 				$this->_defaultException($e, $content);
-			$this->_withDebug($e, $content);
 
+			$this->_withDebug($e, $content);
 
 			return new RestResponse($content, $status, $headers);
 		}
@@ -177,24 +180,24 @@
 			$headers = $e->getHeaders() ?: $headers;
 			$status = $e->getStatusCode() ?: $status;
 
-			$content['errors'] = array_add($content['errors'], 'status', $status);
+			$content['errors'][] = ['status' => $status];
 
 			if ($id = $e->getId())
-				$content['errors'] = array_add($content['errors'], 'id', $id);
+				$content['errors'][] = ['id'=> $id];
 
 			if ($links = $e->getLinks())
-				$content['errors'] = array_add($content['errors'], 'links', $links);
+				$content['errors'][] = ['links'=> $links];
 
 			if ($title = $e->getTitle())
-				$content['errors'] = array_add($content['errors'], 'title', $title);
+				$content['errors'][] = ['title'=> $title];
 
 			if ($source = $e->getSource())
-				$content['errors'] = array_add($content['errors'], 'source', $source);
+				$content['errors'][] = ['source'=> $source];
 
 			if ($detail = $e->getDetail())
-				$content['errors'] = array_add($content['errors'], 'detail', $detail);
+				$content['errors'][] = ['detail'=> $detail];
 
 			if ($meta = $e->getMeta())
-				$content['errors'] = array_add($content['errors'], 'meta', $meta);
+				$content['errors'][] = ['meta'=> $meta];
 		}
 	}

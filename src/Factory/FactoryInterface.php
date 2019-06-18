@@ -9,12 +9,15 @@
 	namespace Kosmosx\Response\Factory;
 
 
+	use Kosmosx\Response\Exceptions\RestException;
+	use Kosmosx\Response\RestResponse;
+
 	interface FactoryInterface
 	{
 		/**
 		 * Method for successful responses
-		 * If you add data use method ->withData($data);
-		 * If you add links use method ->withLinks($links);
+		 * If you add data use method ->withData($data):RestResponse;
+		 * If you add links use method ->withLinks($links):RestResponse;
 		 * return response with content:
 		 * [
 		 *   "success": $content,
@@ -29,7 +32,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function success($content = null, int $status = 200, array $headers = array(), string $type = null);
+		public static function success($content = null, int $status = 200, array $headers = array(), string $type = null): RestResponse;
 
 		/**
 		 * Alias success for Resource created
@@ -41,7 +44,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function created($content = null, array $headers = array(), string $type = null);
+		public static function created($content = null, array $headers = array(), string $type = null): RestResponse;
 
 		/**
 		 * Alias success for Request Accepted
@@ -53,7 +56,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function accepted($content = null, array $headers = array(), string $type = null);
+		public static function accepted($content = null, array $headers = array(), string $type = null): RestResponse;
 
 		/**
 		 * Alias success for No content response
@@ -65,19 +68,7 @@
 		 *
 		 * @return mixed
 		 */
-		public function noContent($content = null, array $headers = array(), string $type = null);
-
-		/**
-		 * Method for data responses
-		 *
-		 * @param string $content
-		 * @param int    $status
-		 * @param array  $headers
-		 * @param int    $json
-		 *
-		 * @return \Illuminate\Http\JsonResponse
-		 */
-		public function successData($content = null, int $status = 200, array $headers = array(), string $type = 'data');
+		public static function noContent($content = null, array $headers = array(), string $type = null): RestResponse;
 
 		/**
 		 * Alias for not modified Response
@@ -89,12 +80,12 @@
 		 *
 		 * @return JsonResponse
 		 */
-		public function notModified(array $headers = array());
+		public static function notModified(array $headers = array()): RestResponse;
 
 		/**
 		 * Method for error responses
-		 * If you add data use method ->withData($data);
-		 * If you add links use method ->withLinks($links);
+		 * If you add data use method ->withData($data):RestResponse;
+		 * If you add links use method ->withLinks($links):RestResponse;
 		 * return response with content:
 		 * [
 		 *   "error": $content,
@@ -105,11 +96,11 @@
 		 * @param string $content
 		 * @param int    $status
 		 * @param array  $headers
-		 * @param bool    $json
+		 * @param bool   $json
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function error($content = null, int $status = 400, array $headers = array(), string $type = 'errors');
+		public static function error($content = null, int $status = 400, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for badRequest
@@ -121,7 +112,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function badRequest($content = null, array $headers = array(), string $type = 'errors');
+		public static function badRequest($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for unauthorized
@@ -133,7 +124,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function unauthorized($content = null, array $headers = array(), string $type = 'errors');
+		public static function unauthorized($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for forbidden
@@ -145,7 +136,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function forbidden($content = null, array $headers = array(), string $type = 'errors');
+		public static function forbidden($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for notFound
@@ -157,7 +148,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function notFound($content = null, array $headers = array(), string $type = 'errors');
+		public static function notFound($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for Method Not Allowed
@@ -169,7 +160,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function methodNotAllowed($content = null, array $headers = array(), string $type = 'errors');
+		public static function methodNotAllowed($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for Request Timeout
@@ -181,7 +172,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function requestTimeout($content = null, array $headers = array(), string $type = 'errors');
+		public static function requestTimeout($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for Precondition Failed
@@ -193,7 +184,7 @@
 		 *
 		 * @return JsonResponse
 		 */
-		public function preconditionFailed($content = null, array $headers = array(), string $type = 'errors');
+		public static function preconditionFailed($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for MediaType
@@ -205,7 +196,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function mediaType($content = null, array $headers = array(), string $type = 'errors');
+		public static function mediaType($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for Range Not Satisfiable
@@ -217,7 +208,7 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function rangeNotSatisfiable($content = null, array $headers = array(), string $type = 'errors');
+		public static function rangeNotSatisfiable($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
 		 * Alias error for Internal
@@ -229,27 +220,30 @@
 		 *
 		 * @return \Illuminate\Http\JsonResponse
 		 */
-		public function internal($content = null, array $headers = array(), string $type = 'errors');
-
 		/**
-		 * Alias error for ServiceUnavailable
-		 *
-		 * @param string $content
-		 * @param int    $status
+		 * @param null   $content
 		 * @param array  $headers
-		 * @param int    $json
+		 * @param string $type
 		 *
-		 * @return \Illuminate\Http\JsonResponse
+		 * @return mixed
 		 */
-		public function serviceUnavailable($content = null, int $status = 500, array $headers = array(), string $type = 'errors');
+		public static function internal($content = null, array $headers = array(), string $type = 'errors'): RestResponse;
 
 		/**
-		 * Metod for error exception
+		 * @param                 $content
+		 * @param int             $code
+		 * @param \Throwable|null $previous
 		 *
-		 * @param       $content
-		 * @param int   $status
-		 * @param array $headers
-		 * @param int   $code
+		 * @return mixed
 		 */
-		public static function exception($content, int $status = 400, array $headers = array(), $code = 0);
+		public static function throwException($content, $code = 0, \Throwable $previous = null);
+
+		/**
+		 * @param                 $content
+		 * @param int             $code
+		 * @param \Throwable|null $previous
+		 *
+		 * @return mixed
+		 */
+		public static function throwExceptionObj($content, $code = 0, \Throwable $previous = null): RestException;
 	}
