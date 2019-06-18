@@ -65,7 +65,7 @@
 			return new RestResponse($content, 415, $headers, $type);
 		}
 
-		public static function rangeNotSatisfiable($content = null, array $headers = array(), string $type = 'errors') {
+		public static function rangeNotSatisfiable($content = null, array $headers = array(), string $type = 'errors'): RestResponse {
 			return new RestResponse($content, 416, $headers, $type);
 		}
 
