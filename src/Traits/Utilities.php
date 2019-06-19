@@ -2,21 +2,29 @@
 
 	namespace Kosmosx\Response\Traits;
 
+	use Kosmosx\Response\Exceptions\RestException;
+	use Symfony\Component\HttpFoundation\JsonResponse;
 	use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 	trait Utilities
 	{
+		protected $metadata = null;
+
 		/**
-		 * @param string $string
-		 * @return bool
+		 * Ger data json_encode
+		 * or can get only element with key / keys
+		 *
+		 * @param string ...$_fields
+		 *
+		 * @return array|mixed
 		 */
-		protected function isJSON($string):?string {
-			if(is_string($string)) {
-				$decoded = json_decode($string, true);
-				if(is_array($decoded) && (json_last_error() == JSON_ERROR_NONE))
-					return $decoded;
-			}
-			return null;
+		public function getData(string ...$_fields): array {
+			$data = json_decode($this->data, true);
+
+			if (!empty($_fields))
+				return $this->find($data, $_fields);
+
+			return is_array($data) ? $data : (array)$data;
 		}
 
 		/**
@@ -28,8 +36,7 @@
 		 *
 		 * @return array
 		 */
-		protected function find($data = array(), ...$_gets): array
-		{
+		protected function find($data = array(), ...$_gets): array {
 			$found = array();
 			foreach ($_gets as $str)
 				array_key_exists($str[0], $data) ? $found[$str[0]] = $data[$str[0]] : null;
@@ -38,64 +45,48 @@
 		}
 
 		/**
-		 * Get element of array with dot notation
+		 * Reset response object
 		 *
-		 * @param array  $data
-		 * @param string $needle
-		 * @param string $separator
-		 *
-		 * @return array|mixed
+		 * @return $this
 		 */
-		protected function getArrayByPath($data, ?string $needle, string $separator = '.')
-		{
-			if(!is_array($data) || !$needle)
-				return null;
-
-			$keys = explode($separator, $needle);
-
-
-			foreach ($keys as $key)
-				$data = &$data[$key];
-
-			//return last element
-			return $data ?: null;
+		public function reset(): JsonResponse {
+			$this->init($this->statusCode, $this->headers);
+			$this->setJson("");
+			return $this;
 		}
 
 		/**
-		 * Assign to element value with dot notation
+		 * Set a header on the Response.
 		 *
-		 * @param array  $data
-		 * @param string $needle
-		 * @param        $value
-		 * @param string $separator
+		 * @param string       $key
+		 * @param array|string $values
+		 * @param bool         $replace
+		 *
+		 * @return $this
 		 */
-		protected function assignArrayByPath(array &$data, string $needle, $value, string $separator = '.')
-		{
-			$keys = explode($separator, $needle);
-
-			foreach ($keys as $key)
-				$data = &$data[$key];
-
-			//assign value to last element
-			$data = $value;
+		public function setHeader($key, $values, $replace = true): JsonResponse {
+			$this->headers->set($key, $values, $replace);
+			return $this;
 		}
 
 		/**
-		 * Ger data json_encode
-		 * or can get only element with key / keys
+		 * Add an array of headers to the response.
 		 *
-		 * @param string ...$_fields
+		 * @param \Symfony\Component\HttpFoundation\HeaderBag|array $headers
 		 *
-		 * @return array|mixed
+		 * @return $this
 		 */
-		public function getData(string ...$_fields): array
-		{
-			$data = json_decode($this->data, true);
+		public function setHeaders($headers): JsonResponse {
+			if ($headers instanceof HeaderBag)
+				$headers = $headers->all();
+			else if (is_array($headers))
+				foreach ($headers as $key => $value) {
+					$this->headers->set($key, $value);
+				}
+			else
+				return new RestException("header parameter is not valid");
 
-			if (!empty($_fields))
-				return $this->find($data, $_fields);
-
-			return is_array($data) ? $data : (array) $data;
+			return $this;
 		}
 
 		/**
@@ -106,8 +97,7 @@
 		 *
 		 * @return array
 		 */
-		public function getMetadata(string ...$_fields): array
-		{
+		public function getMetadata(string ...$_fields): array {
 			$metadata = json_decode($this->metadata, true);
 
 			if (!empty($_fields))
@@ -117,20 +107,103 @@
 		}
 
 		/**
+		 * @param array $values
+		 *
+		 * @return \Symfony\Component\HttpFoundation\JsonResponse
+		 */
+		public function setMetadata(array $values): JsonResponse {
+			$metadata = json_decode($this->metadata, true);
+
+			foreach ($values as $key => $value)
+				$metadata[$key] = $value;
+
+			$this->metadata = json_encode($metadata, JSON_FORCE_OBJECT);
+
+			return $this;
+		}
+
+		/**
 		 * Ger content json_encode
 		 * or can get only element with key / keys
 		 *
-		 * @param bool $parent
+		 * @param string ...$_fields
 		 *
-		 * @return mixed|string
+		 * @return array
 		 */
-		public function getContent(string ...$_fields): array
-		{
+		public function getContent(string ...$_fields): array {
 			$content = json_decode($this->content, true);
 
 			if (!empty($_fields))
 				return $this->find($content, $_fields);
 
 			return $content ?: array();
+		}
+
+		/**
+		 * @param $string
+		 *
+		 * @return null|string
+		 */
+		protected function isJSON($string): ?string {
+			if (is_string($string)) {
+				$decoded = json_decode($string, true);
+				if (is_array($decoded) && (json_last_error() == JSON_ERROR_NONE))
+					return $decoded;
+			}
+			return null;
+		}
+
+		/**
+		 * Get last element of array with dot notation
+		 *
+		 * @param array  $data
+		 * @param string $needle
+		 * @param string $separator
+		 *
+		 * @return array|mixed
+		 */
+		protected function getArrayByPath(array $data, ?string $needle, string $separator = '.') {
+			$keys = explode($separator, $needle);
+
+			foreach ($keys as $key) {
+				if (end($keys) === $key && array_key_exists($key, $data))
+					$get = $data[$key];
+			}
+
+			return isset($get) ? $get : null;
+		}
+
+		/**
+		 * Assign value to element of array with dot notation
+		 *
+		 * @param array  $content
+		 * @param string $needle
+		 * @param        $data
+		 * @param bool   $override
+		 * @param string $separator
+		 */
+		protected function assignArrayByPath(array &$content, string $needle, $data, bool $override = false, string $separator = '.') {
+			$keys = explode($separator, $needle);
+
+			foreach ($keys as $key) {
+				if (end($keys) !== $key) {
+					$content = &$content[$key];
+					continue;
+				}
+			}
+
+			if (is_array($content)) {
+				if (false === array_key_exists($key, $content))
+					$content[$key] = $data;
+				else
+					$content[$key] = $override ? $data : array_merge((array)$content[$key], (array)$data);
+			} else {
+				$data = array($key => $data);
+
+				if (null != $content && true === $override)
+					$content = [$content, $data];
+				else
+					$content = $data;
+			}
 		}
 	}
